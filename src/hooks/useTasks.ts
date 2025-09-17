@@ -24,8 +24,9 @@ export const useTasks = () => {
 
       const response = await tasksAPI.taskControllerGetAllTasks(user.id);
       setTasks(response);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar las tareas');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar las tareas';
+      setError(errorMessage);
       console.error('Error fetching tasks:', err);
     } finally {
       setIsLoading(false);
@@ -56,8 +57,9 @@ export const useCreateTask = () => {
       
       const response = await tasksAPI.taskControllerCreateTask(taskData);
       return response;
-    } catch (err: any) {
-      setError(err.message || 'Error creando tarea');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error creando tarea';
+      setError(errorMessage);
       console.error('Error creando tarea:', err);
       throw err;
     } finally {
@@ -84,8 +86,9 @@ export const useUpdateTask = () => {
       
       const response = await tasksAPI.taskControllerUpdateTaskById(id, taskData);
       return response;
-    } catch (err: any) {
-      setError(err.message || 'Error actualizando tarea');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error actualizando tarea';
+      setError(errorMessage);
       console.error('Error actualizando tarea:', err);
       throw err;
     } finally {
@@ -112,8 +115,9 @@ export const useDeleteTask = () => {
       
       await tasksAPI.taskControllerDeleteTask(id);
       return true;
-    } catch (err: any) {
-      setError(err.message || 'Error eliminando tarea');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error eliminando tarea';
+      setError(errorMessage);
       console.error('Error eliminando tarea:', err);
       throw err;
     } finally {
@@ -140,8 +144,9 @@ export const useUpdateTaskState = () => {
       
       const response = await tasksAPI.taskControllerUpdateTaskState(id, stateData);
       return response;
-    } catch (err: any) {
-      setError(err.message || 'Error actualizando estado de tarea');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error actualizando estado de tarea';
+      setError(errorMessage);
       console.error('Error actualizando estado de tarea:', err);
       throw err;
     } finally {

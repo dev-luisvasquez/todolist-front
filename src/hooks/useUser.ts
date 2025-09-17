@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { getUsers } from '@/api/generated/users/users';
 import getUser from '@/utils/auth';
-import { UserResponseDto, UpdateUserDto } from '@/api/generated';
+import { UserResponseDto, UpdateUserDto, UserInfoDto } from '@/api/generated';
 
 // Crear instancia de las funciones de users
 const usersAPI = getUsers();
 
 // Hook para obtener el usuario del localStorage de manera reactiva
 export const useLocalStorageUser = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserInfoDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Función para obtener el usuario del localStorage
@@ -25,7 +25,7 @@ export const useLocalStorageUser = () => {
   };
 
   // Función para actualizar el usuario en el localStorage
-  const updateUserInStorage = (newUser: any) => {
+  const updateUserInStorage = (newUser: UserResponseDto) => {
     try {
       getUser.setUser(newUser);
       setUser(newUser);
@@ -94,8 +94,9 @@ export const useUser = () => {
 
       const response = await usersAPI.usersControllerGetUserById(currentUser.id);
       setUser(response);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar información del usuario');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar información del usuario';
+      setError(errorMessage);
       console.error('Error fetching user info:', err);
     } finally {
       setIsLoading(false);
@@ -127,8 +128,9 @@ export const useAllUsers = () => {
       
       const response = await usersAPI.usersControllerGetAllUsers();
       setUsers(response);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar usuarios');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar usuarios';
+      setError(errorMessage);
       console.error('Error fetching users:', err);
     } finally {
       setIsLoading(false);
@@ -159,8 +161,9 @@ export const useUpdateUser = () => {
       
       const response = await usersAPI.usersControllerUpdateUserById(id, userData);
       return response;
-    } catch (err: any) {
-      setError(err.message || 'Error actualizando usuario');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error actualizando usuario';
+      setError(errorMessage);
       console.error('Error actualizando usuario:', err);
       throw err;
     } finally {
@@ -187,8 +190,9 @@ export const useDeleteUser = () => {
       
       await usersAPI.usersControllerDeleteUserById(id);
       return true;
-    } catch (err: any) {
-      setError(err.message || 'Error eliminando usuario');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error eliminando usuario';
+      setError(errorMessage);
       console.error('Error eliminando usuario:', err);
       throw err;
     } finally {
@@ -220,8 +224,9 @@ export const useUserById = (userId: string) => {
 
       const response = await usersAPI.usersControllerGetUserById(userId);
       setUser(response);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar usuario');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar usuario';
+      setError(errorMessage);
       console.error('Error fetching user by id:', err);
     } finally {
       setIsLoading(false);

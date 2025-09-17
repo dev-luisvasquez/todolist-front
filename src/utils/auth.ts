@@ -1,4 +1,5 @@
 // Utilidades para manejar el estado de autenticación
+import { UserResponseDto } from "@/api/generated";
 
 export const AuthStorage = {
   // Getters
@@ -31,7 +32,7 @@ export const AuthStorage = {
     }
   },
 
-  setUser: (user: any): void => {
+  setUser: (user: UserResponseDto): void => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('user', JSON.stringify(user));
     }

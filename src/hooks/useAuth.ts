@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuth } from '@/api/generated/auth/auth';
-import { AuthDto, CreateUserDto, LoginResponseDto } from '@/api/generated';
+import { AuthDto, CreateUserDto } from '@/api/generated';
 import AuthStorage from '@/utils/auth';
 
 // Crear instancia de las funciones de auth
@@ -30,8 +30,9 @@ export const useLogin = () => {
       }
       
       return response;
-    } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      setError(errorMessage);
       console.error('Error logging in:', err);
       throw err;
     } finally {
@@ -70,8 +71,9 @@ export const useRegister = () => {
       }
       
       return response;
-    } catch (err: any) {
-      setError(err.message || 'Error al registrar usuario');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al registrar usuario';
+      setError(errorMessage);
       console.error('Error registering:', err);
       throw err;
     } finally {

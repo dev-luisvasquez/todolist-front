@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/QueryProvider";
+import ConditionalHeader from "@/components/ConditionalHeader";
+import RouteGuard from "@/components/RouteGuard";
+
 
 const poppins = Poppins({
   weight: ['300', '400', '500', '600', '700'],
@@ -25,7 +28,10 @@ export default function RootLayout({
         className={`${poppins.variable} ${poppins.className} antialiased`}
       >
         <QueryProvider>
-          {children}
+          <RouteGuard>
+            <ConditionalHeader />
+            {children}
+          </RouteGuard>
         </QueryProvider>
       </body>
     </html>

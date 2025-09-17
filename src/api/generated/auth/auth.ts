@@ -5,14 +5,6 @@
  * API para gestión de tareas y usuarios
  * OpenAPI spec version: 1.0
  */
-import { useMutation } from "@tanstack/react-query";
-import type {
-  MutationFunction,
-  QueryClient,
-  UseMutationOptions,
-  UseMutationResult,
-} from "@tanstack/react-query";
-
 import type {
   AuthControllerRecoverPasswordBody,
   AuthControllerRequestPasswordRecoveryBody,
@@ -25,455 +17,117 @@ import { customInstance } from "../../mutator/custom-instance";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-/**
- * Crea una nueva cuenta de usuario en el sistema
- * @summary Registrar nuevo usuario
- */
-export const authControllerSignUp = (
-  createUserDto: CreateUserDto,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<LoginResponseDto>(
-    {
-      url: `/auth/signup`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      data: createUserDto,
-      signal,
-    },
-    options,
-  );
-};
-
-export const getAuthControllerSignUpMutationOptions = <
-  TError = null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof authControllerSignUp>>,
-    TError,
-    { data: CreateUserDto },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof authControllerSignUp>>,
-  TError,
-  { data: CreateUserDto },
-  TContext
-> => {
-  const mutationKey = ["authControllerSignUp"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof authControllerSignUp>>,
-    { data: CreateUserDto }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return authControllerSignUp(data, requestOptions);
+export const getAuth = () => {
+  /**
+   * Crea una nueva cuenta de usuario en el sistema
+   * @summary Registrar nuevo usuario
+   */
+  const authControllerSignUp = (
+    createUserDto: CreateUserDto,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<LoginResponseDto>(
+      {
+        url: `/auth/signup`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: createUserDto,
+      },
+      options,
+    );
   };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type AuthControllerSignUpMutationResult = NonNullable<
-  Awaited<ReturnType<typeof authControllerSignUp>>
->;
-export type AuthControllerSignUpMutationBody = CreateUserDto;
-export type AuthControllerSignUpMutationError = null;
-
-/**
- * @summary Registrar nuevo usuario
- */
-export const useAuthControllerSignUp = <TError = null, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof authControllerSignUp>>,
-      TError,
-      { data: CreateUserDto },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof authControllerSignUp>>,
-  TError,
-  { data: CreateUserDto },
-  TContext
-> => {
-  const mutationOptions = getAuthControllerSignUpMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Autentica un usuario con email y contraseña
- * @summary Iniciar sesión
- */
-export const authControllerSignIn = (
-  authDto: AuthDto,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<LoginResponseDto>(
-    {
-      url: `/auth/signin`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      data: authDto,
-      signal,
-    },
-    options,
-  );
-};
-
-export const getAuthControllerSignInMutationOptions = <
-  TError = null | null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof authControllerSignIn>>,
-    TError,
-    { data: AuthDto },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof authControllerSignIn>>,
-  TError,
-  { data: AuthDto },
-  TContext
-> => {
-  const mutationKey = ["authControllerSignIn"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof authControllerSignIn>>,
-    { data: AuthDto }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return authControllerSignIn(data, requestOptions);
+  /**
+   * Autentica un usuario con email y contraseña
+   * @summary Iniciar sesión
+   */
+  const authControllerSignIn = (
+    authDto: AuthDto,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<LoginResponseDto>(
+      {
+        url: `/auth/signin`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: authDto,
+      },
+      options,
+    );
   };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type AuthControllerSignInMutationResult = NonNullable<
-  Awaited<ReturnType<typeof authControllerSignIn>>
->;
-export type AuthControllerSignInMutationBody = AuthDto;
-export type AuthControllerSignInMutationError = null | null;
-
-/**
- * @summary Iniciar sesión
- */
-export const useAuthControllerSignIn = <
-  TError = null | null,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof authControllerSignIn>>,
-      TError,
-      { data: AuthDto },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof authControllerSignIn>>,
-  TError,
-  { data: AuthDto },
-  TContext
-> => {
-  const mutationOptions = getAuthControllerSignInMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Genera un nuevo token de acceso usando el refresh token
- * @summary Renovar token de acceso
- */
-export const authControllerRefreshToken = (
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<LoginResponseDto>(
-    { url: `/auth/refresh-token`, method: "POST", signal },
-    options,
-  );
-};
-
-export const getAuthControllerRefreshTokenMutationOptions = <
-  TError = null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof authControllerRefreshToken>>,
-    TError,
-    void,
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof authControllerRefreshToken>>,
-  TError,
-  void,
-  TContext
-> => {
-  const mutationKey = ["authControllerRefreshToken"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof authControllerRefreshToken>>,
-    void
-  > = () => {
-    return authControllerRefreshToken(requestOptions);
+  /**
+   * Genera un nuevo token de acceso usando el refresh token
+   * @summary Renovar token de acceso
+   */
+  const authControllerRefreshToken = (
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<LoginResponseDto>(
+      { url: `/auth/refresh-token`, method: "POST" },
+      options,
+    );
   };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type AuthControllerRefreshTokenMutationResult = NonNullable<
-  Awaited<ReturnType<typeof authControllerRefreshToken>>
->;
-
-export type AuthControllerRefreshTokenMutationError = null;
-
-/**
- * @summary Renovar token de acceso
- */
-export const useAuthControllerRefreshToken = <
-  TError = null,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof authControllerRefreshToken>>,
-      TError,
-      void,
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof authControllerRefreshToken>>,
-  TError,
-  void,
-  TContext
-> => {
-  const mutationOptions = getAuthControllerRefreshTokenMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Establece una nueva contraseña usando el token de recuperación
- * @summary Recuperar contraseña
- */
-export const authControllerRecoverPassword = (
-  authControllerRecoverPasswordBody: AuthControllerRecoverPasswordBody,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<null>(
-    {
-      url: `/auth/recover-password`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      data: authControllerRecoverPasswordBody,
-      signal,
-    },
-    options,
-  );
-};
-
-export const getAuthControllerRecoverPasswordMutationOptions = <
-  TError = null | null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof authControllerRecoverPassword>>,
-    TError,
-    { data: AuthControllerRecoverPasswordBody },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof authControllerRecoverPassword>>,
-  TError,
-  { data: AuthControllerRecoverPasswordBody },
-  TContext
-> => {
-  const mutationKey = ["authControllerRecoverPassword"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof authControllerRecoverPassword>>,
-    { data: AuthControllerRecoverPasswordBody }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return authControllerRecoverPassword(data, requestOptions);
+  /**
+   * Establece una nueva contraseña usando el token de recuperación
+   * @summary Recuperar contraseña
+   */
+  const authControllerRecoverPassword = (
+    authControllerRecoverPasswordBody: AuthControllerRecoverPasswordBody,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<null>(
+      {
+        url: `/auth/recover-password`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: authControllerRecoverPasswordBody,
+      },
+      options,
+    );
   };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type AuthControllerRecoverPasswordMutationResult = NonNullable<
-  Awaited<ReturnType<typeof authControllerRecoverPassword>>
->;
-export type AuthControllerRecoverPasswordMutationBody =
-  AuthControllerRecoverPasswordBody;
-export type AuthControllerRecoverPasswordMutationError = null | null;
-
-/**
- * @summary Recuperar contraseña
- */
-export const useAuthControllerRecoverPassword = <
-  TError = null | null,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof authControllerRecoverPassword>>,
-      TError,
-      { data: AuthControllerRecoverPasswordBody },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof authControllerRecoverPassword>>,
-  TError,
-  { data: AuthControllerRecoverPasswordBody },
-  TContext
-> => {
-  const mutationOptions =
-    getAuthControllerRecoverPasswordMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Envía un email con el token para recuperar la contraseña
- * @summary Solicitar recuperación de contraseña
- */
-export const authControllerRequestPasswordRecovery = (
-  authControllerRequestPasswordRecoveryBody: AuthControllerRequestPasswordRecoveryBody,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<null>(
-    {
-      url: `/auth/request-password-recovery`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      data: authControllerRequestPasswordRecoveryBody,
-      signal,
-    },
-    options,
-  );
-};
-
-export const getAuthControllerRequestPasswordRecoveryMutationOptions = <
-  TError = null | null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof authControllerRequestPasswordRecovery>>,
-    TError,
-    { data: AuthControllerRequestPasswordRecoveryBody },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof authControllerRequestPasswordRecovery>>,
-  TError,
-  { data: AuthControllerRequestPasswordRecoveryBody },
-  TContext
-> => {
-  const mutationKey = ["authControllerRequestPasswordRecovery"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof authControllerRequestPasswordRecovery>>,
-    { data: AuthControllerRequestPasswordRecoveryBody }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return authControllerRequestPasswordRecovery(data, requestOptions);
+  /**
+   * Envía un email con el token para recuperar la contraseña
+   * @summary Solicitar recuperación de contraseña
+   */
+  const authControllerRequestPasswordRecovery = (
+    authControllerRequestPasswordRecoveryBody: AuthControllerRequestPasswordRecoveryBody,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<null>(
+      {
+        url: `/auth/request-password-recovery`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: authControllerRequestPasswordRecoveryBody,
+      },
+      options,
+    );
   };
-
-  return { mutationFn, ...mutationOptions };
+  return {
+    authControllerSignUp,
+    authControllerSignIn,
+    authControllerRefreshToken,
+    authControllerRecoverPassword,
+    authControllerRequestPasswordRecovery,
+  };
 };
-
-export type AuthControllerRequestPasswordRecoveryMutationResult = NonNullable<
-  Awaited<ReturnType<typeof authControllerRequestPasswordRecovery>>
+export type AuthControllerSignUpResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getAuth>["authControllerSignUp"]>>
 >;
-export type AuthControllerRequestPasswordRecoveryMutationBody =
-  AuthControllerRequestPasswordRecoveryBody;
-export type AuthControllerRequestPasswordRecoveryMutationError = null | null;
-
-/**
- * @summary Solicitar recuperación de contraseña
- */
-export const useAuthControllerRequestPasswordRecovery = <
-  TError = null | null,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof authControllerRequestPasswordRecovery>>,
-      TError,
-      { data: AuthControllerRequestPasswordRecoveryBody },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof authControllerRequestPasswordRecovery>>,
-  TError,
-  { data: AuthControllerRequestPasswordRecoveryBody },
-  TContext
-> => {
-  const mutationOptions =
-    getAuthControllerRequestPasswordRecoveryMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
+export type AuthControllerSignInResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getAuth>["authControllerSignIn"]>>
+>;
+export type AuthControllerRefreshTokenResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getAuth>["authControllerRefreshToken"]>>
+>;
+export type AuthControllerRecoverPasswordResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getAuth>["authControllerRecoverPassword"]>
+  >
+>;
+export type AuthControllerRequestPasswordRecoveryResult = NonNullable<
+  Awaited<
+    ReturnType<
+      ReturnType<typeof getAuth>["authControllerRequestPasswordRecovery"]
+    >
+  >
+>;

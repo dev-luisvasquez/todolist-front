@@ -5,22 +5,6 @@
  * API para gestión de tareas y usuarios
  * OpenAPI spec version: 1.0
  */
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult,
-} from "@tanstack/react-query";
-
 import type {
   CreateTaskDto,
   DeleteMultipleTasksDto,
@@ -33,775 +17,154 @@ import { customInstance } from "../../mutator/custom-instance";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-/**
- * Obtiene una lista de todas las tareas registradas en el sistema
- * @summary Obtener todas las tareas
- */
-export const taskControllerGetAllTasks = (
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<TaskDto[]>(
-    { url: `/tasks`, method: "GET", signal },
-    options,
-  );
-};
-
-export const getTaskControllerGetAllTasksQueryKey = () => {
-  return [`/tasks`] as const;
-};
-
-export const getTaskControllerGetAllTasksQueryOptions = <
-  TData = Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-  TError = unknown,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-      TError,
-      TData
-    >
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getTaskControllerGetAllTasksQueryKey();
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof taskControllerGetAllTasks>>
-  > = ({ signal }) => taskControllerGetAllTasks(requestOptions, signal);
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type TaskControllerGetAllTasksQueryResult = NonNullable<
-  Awaited<ReturnType<typeof taskControllerGetAllTasks>>
->;
-export type TaskControllerGetAllTasksQueryError = unknown;
-
-export function useTaskControllerGetAllTasks<
-  TData = Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-  TError = unknown,
->(
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-          TError,
-          Awaited<ReturnType<typeof taskControllerGetAllTasks>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useTaskControllerGetAllTasks<
-  TData = Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-  TError = unknown,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-          TError,
-          Awaited<ReturnType<typeof taskControllerGetAllTasks>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useTaskControllerGetAllTasks<
-  TData = Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-  TError = unknown,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-/**
- * @summary Obtener todas las tareas
- */
-
-export function useTaskControllerGetAllTasks<
-  TData = Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-  TError = unknown,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof taskControllerGetAllTasks>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getTaskControllerGetAllTasksQueryOptions(options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-/**
- * Crea una nueva tarea en el sistema
- * @summary Crear nueva tarea
- */
-export const taskControllerCreateTask = (
-  createTaskDto: CreateTaskDto,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<TaskDto>(
-    {
-      url: `/tasks`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      data: createTaskDto,
-      signal,
-    },
-    options,
-  );
-};
-
-export const getTaskControllerCreateTaskMutationOptions = <
-  TError = null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof taskControllerCreateTask>>,
-    TError,
-    { data: CreateTaskDto },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof taskControllerCreateTask>>,
-  TError,
-  { data: CreateTaskDto },
-  TContext
-> => {
-  const mutationKey = ["taskControllerCreateTask"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof taskControllerCreateTask>>,
-    { data: CreateTaskDto }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return taskControllerCreateTask(data, requestOptions);
+export const getTasks = () => {
+  /**
+   * Obtiene una lista de todas las tareas registradas en el sistema
+   * @summary Obtener todas las tareas por id de usuario
+   */
+  const taskControllerGetAllTasks = (
+    id: string,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<TaskDto[]>(
+      { url: `/tasks/user/${id}`, method: "GET" },
+      options,
+    );
   };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type TaskControllerCreateTaskMutationResult = NonNullable<
-  Awaited<ReturnType<typeof taskControllerCreateTask>>
->;
-export type TaskControllerCreateTaskMutationBody = CreateTaskDto;
-export type TaskControllerCreateTaskMutationError = null;
-
-/**
- * @summary Crear nueva tarea
- */
-export const useTaskControllerCreateTask = <TError = null, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof taskControllerCreateTask>>,
-      TError,
-      { data: CreateTaskDto },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof taskControllerCreateTask>>,
-  TError,
-  { data: CreateTaskDto },
-  TContext
-> => {
-  const mutationOptions = getTaskControllerCreateTaskMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Elimina múltiples tareas del sistema usando sus IDs
- * @summary Eliminar múltiples tareas
- */
-export const taskControllerDeleteMultipleTasks = (
-  deleteMultipleTasksDto: DeleteMultipleTasksDto,
-  options?: SecondParameter<typeof customInstance>,
-) => {
-  return customInstance<null>(
-    {
-      url: `/tasks`,
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      data: deleteMultipleTasksDto,
-    },
-    options,
-  );
-};
-
-export const getTaskControllerDeleteMultipleTasksMutationOptions = <
-  TError = null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof taskControllerDeleteMultipleTasks>>,
-    TError,
-    { data: DeleteMultipleTasksDto },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof taskControllerDeleteMultipleTasks>>,
-  TError,
-  { data: DeleteMultipleTasksDto },
-  TContext
-> => {
-  const mutationKey = ["taskControllerDeleteMultipleTasks"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof taskControllerDeleteMultipleTasks>>,
-    { data: DeleteMultipleTasksDto }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return taskControllerDeleteMultipleTasks(data, requestOptions);
+  /**
+   * Obtiene la información de una tarea específica por su ID
+   * @summary Obtener tarea por ID
+   */
+  const taskControllerGetTaskById = (
+    id: string,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<TaskDto>(
+      { url: `/tasks/${id}`, method: "GET" },
+      options,
+    );
   };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type TaskControllerDeleteMultipleTasksMutationResult = NonNullable<
-  Awaited<ReturnType<typeof taskControllerDeleteMultipleTasks>>
->;
-export type TaskControllerDeleteMultipleTasksMutationBody =
-  DeleteMultipleTasksDto;
-export type TaskControllerDeleteMultipleTasksMutationError = null;
-
-/**
- * @summary Eliminar múltiples tareas
- */
-export const useTaskControllerDeleteMultipleTasks = <
-  TError = null,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof taskControllerDeleteMultipleTasks>>,
-      TError,
-      { data: DeleteMultipleTasksDto },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof taskControllerDeleteMultipleTasks>>,
-  TError,
-  { data: DeleteMultipleTasksDto },
-  TContext
-> => {
-  const mutationOptions =
-    getTaskControllerDeleteMultipleTasksMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Obtiene la información de una tarea específica por su ID
- * @summary Obtener tarea por ID
- */
-export const taskControllerGetTaskById = (
-  id: string,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<TaskDto>(
-    { url: `/tasks/${id}`, method: "GET", signal },
-    options,
-  );
-};
-
-export const getTaskControllerGetTaskByIdQueryKey = (id?: string) => {
-  return [`/tasks/${id}`] as const;
-};
-
-export const getTaskControllerGetTaskByIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-  TError = null,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getTaskControllerGetTaskByIdQueryKey(id);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof taskControllerGetTaskById>>
-  > = ({ signal }) => taskControllerGetTaskById(id, requestOptions, signal);
-
+  /**
+   * Actualiza toda la información de una tarea específica
+   * @summary Actualizar tarea completa
+   */
+  const taskControllerUpdateTaskById = (
+    id: string,
+    updateTaskDto: UpdateTaskDto,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<TaskDto>(
+      {
+        url: `/tasks/${id}`,
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        data: updateTaskDto,
+      },
+      options,
+    );
+  };
+  /**
+   * Elimina una tarea específica del sistema
+   * @summary Eliminar tarea por ID
+   */
+  const taskControllerDeleteTask = (
+    id: string,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<TaskDto>(
+      { url: `/tasks/${id}`, method: "DELETE" },
+      options,
+    );
+  };
+  /**
+   * Crea una nueva tarea en el sistema
+   * @summary Crear nueva tarea
+   */
+  const taskControllerCreateTask = (
+    createTaskDto: CreateTaskDto,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<TaskDto>(
+      {
+        url: `/tasks`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: createTaskDto,
+      },
+      options,
+    );
+  };
+  /**
+   * Elimina múltiples tareas del sistema usando sus IDs
+   * @summary Eliminar múltiples tareas
+   */
+  const taskControllerDeleteMultipleTasks = (
+    deleteMultipleTasksDto: DeleteMultipleTasksDto,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<null>(
+      {
+        url: `/tasks`,
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        data: deleteMultipleTasksDto,
+      },
+      options,
+    );
+  };
+  /**
+   * Actualiza únicamente el estado de una tarea específica
+   * @summary Actualizar estado de tarea
+   */
+  const taskControllerUpdateTaskState = (
+    id: string,
+    updateTaskStateDto: UpdateTaskStateDto,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<TaskDto>(
+      {
+        url: `/tasks/${id}/state`,
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        data: updateTaskStateDto,
+      },
+      options,
+    );
+  };
   return {
-    queryKey,
-    queryFn,
-    enabled: !!id,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type TaskControllerGetTaskByIdQueryResult = NonNullable<
-  Awaited<ReturnType<typeof taskControllerGetTaskById>>
->;
-export type TaskControllerGetTaskByIdQueryError = null;
-
-export function useTaskControllerGetTaskById<
-  TData = Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-  TError = null,
->(
-  id: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-          TError,
-          Awaited<ReturnType<typeof taskControllerGetTaskById>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useTaskControllerGetTaskById<
-  TData = Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-  TError = null,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-          TError,
-          Awaited<ReturnType<typeof taskControllerGetTaskById>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useTaskControllerGetTaskById<
-  TData = Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-  TError = null,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-/**
- * @summary Obtener tarea por ID
- */
-
-export function useTaskControllerGetTaskById<
-  TData = Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-  TError = null,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof taskControllerGetTaskById>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getTaskControllerGetTaskByIdQueryOptions(id, options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-/**
- * Actualiza toda la información de una tarea específica
- * @summary Actualizar tarea completa
- */
-export const taskControllerUpdateTaskById = (
-  id: string,
-  updateTaskDto: UpdateTaskDto,
-  options?: SecondParameter<typeof customInstance>,
-) => {
-  return customInstance<TaskDto>(
-    {
-      url: `/tasks/${id}`,
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      data: updateTaskDto,
-    },
-    options,
-  );
-};
-
-export const getTaskControllerUpdateTaskByIdMutationOptions = <
-  TError = null | null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof taskControllerUpdateTaskById>>,
-    TError,
-    { id: string; data: UpdateTaskDto },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof taskControllerUpdateTaskById>>,
-  TError,
-  { id: string; data: UpdateTaskDto },
-  TContext
-> => {
-  const mutationKey = ["taskControllerUpdateTaskById"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof taskControllerUpdateTaskById>>,
-    { id: string; data: UpdateTaskDto }
-  > = (props) => {
-    const { id, data } = props ?? {};
-
-    return taskControllerUpdateTaskById(id, data, requestOptions);
+    taskControllerGetAllTasks,
+    taskControllerGetTaskById,
+    taskControllerUpdateTaskById,
+    taskControllerDeleteTask,
+    taskControllerCreateTask,
+    taskControllerDeleteMultipleTasks,
+    taskControllerUpdateTaskState,
   };
-
-  return { mutationFn, ...mutationOptions };
 };
-
-export type TaskControllerUpdateTaskByIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof taskControllerUpdateTaskById>>
+export type TaskControllerGetAllTasksResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getTasks>["taskControllerGetAllTasks"]>>
 >;
-export type TaskControllerUpdateTaskByIdMutationBody = UpdateTaskDto;
-export type TaskControllerUpdateTaskByIdMutationError = null | null;
-
-/**
- * @summary Actualizar tarea completa
- */
-export const useTaskControllerUpdateTaskById = <
-  TError = null | null,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof taskControllerUpdateTaskById>>,
-      TError,
-      { id: string; data: UpdateTaskDto },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof taskControllerUpdateTaskById>>,
-  TError,
-  { id: string; data: UpdateTaskDto },
-  TContext
-> => {
-  const mutationOptions =
-    getTaskControllerUpdateTaskByIdMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Elimina una tarea específica del sistema
- * @summary Eliminar tarea por ID
- */
-export const taskControllerDeleteTask = (
-  id: string,
-  options?: SecondParameter<typeof customInstance>,
-) => {
-  return customInstance<TaskDto>(
-    { url: `/tasks/${id}`, method: "DELETE" },
-    options,
-  );
-};
-
-export const getTaskControllerDeleteTaskMutationOptions = <
-  TError = null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof taskControllerDeleteTask>>,
-    TError,
-    { id: string },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof taskControllerDeleteTask>>,
-  TError,
-  { id: string },
-  TContext
-> => {
-  const mutationKey = ["taskControllerDeleteTask"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof taskControllerDeleteTask>>,
-    { id: string }
-  > = (props) => {
-    const { id } = props ?? {};
-
-    return taskControllerDeleteTask(id, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type TaskControllerDeleteTaskMutationResult = NonNullable<
-  Awaited<ReturnType<typeof taskControllerDeleteTask>>
+export type TaskControllerGetTaskByIdResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getTasks>["taskControllerGetTaskById"]>>
 >;
-
-export type TaskControllerDeleteTaskMutationError = null;
-
-/**
- * @summary Eliminar tarea por ID
- */
-export const useTaskControllerDeleteTask = <TError = null, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof taskControllerDeleteTask>>,
-      TError,
-      { id: string },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof taskControllerDeleteTask>>,
-  TError,
-  { id: string },
-  TContext
-> => {
-  const mutationOptions = getTaskControllerDeleteTaskMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Actualiza únicamente el estado de una tarea específica
- * @summary Actualizar estado de tarea
- */
-export const taskControllerUpdateTaskState = (
-  id: string,
-  updateTaskStateDto: UpdateTaskStateDto,
-  options?: SecondParameter<typeof customInstance>,
-) => {
-  return customInstance<TaskDto>(
-    {
-      url: `/tasks/${id}/state`,
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      data: updateTaskStateDto,
-    },
-    options,
-  );
-};
-
-export const getTaskControllerUpdateTaskStateMutationOptions = <
-  TError = null | null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof taskControllerUpdateTaskState>>,
-    TError,
-    { id: string; data: UpdateTaskStateDto },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof taskControllerUpdateTaskState>>,
-  TError,
-  { id: string; data: UpdateTaskStateDto },
-  TContext
-> => {
-  const mutationKey = ["taskControllerUpdateTaskState"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof taskControllerUpdateTaskState>>,
-    { id: string; data: UpdateTaskStateDto }
-  > = (props) => {
-    const { id, data } = props ?? {};
-
-    return taskControllerUpdateTaskState(id, data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type TaskControllerUpdateTaskStateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof taskControllerUpdateTaskState>>
+export type TaskControllerUpdateTaskByIdResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getTasks>["taskControllerUpdateTaskById"]>
+  >
 >;
-export type TaskControllerUpdateTaskStateMutationBody = UpdateTaskStateDto;
-export type TaskControllerUpdateTaskStateMutationError = null | null;
-
-/**
- * @summary Actualizar estado de tarea
- */
-export const useTaskControllerUpdateTaskState = <
-  TError = null | null,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof taskControllerUpdateTaskState>>,
-      TError,
-      { id: string; data: UpdateTaskStateDto },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof taskControllerUpdateTaskState>>,
-  TError,
-  { id: string; data: UpdateTaskStateDto },
-  TContext
-> => {
-  const mutationOptions =
-    getTaskControllerUpdateTaskStateMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
+export type TaskControllerDeleteTaskResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getTasks>["taskControllerDeleteTask"]>>
+>;
+export type TaskControllerCreateTaskResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getTasks>["taskControllerCreateTask"]>>
+>;
+export type TaskControllerDeleteMultipleTasksResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getTasks>["taskControllerDeleteMultipleTasks"]>
+  >
+>;
+export type TaskControllerUpdateTaskStateResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getTasks>["taskControllerUpdateTaskState"]>
+  >
+>;

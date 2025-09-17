@@ -9,7 +9,9 @@ import type { UserInfoDto } from "./userInfoDto";
 
 export interface LoginResponseDto {
   /** Token JWT de acceso */
-  access_token: string;
+  access_Token: string;
+  /** Token JWT de refresco que dura 7 días */
+  refresh_Token: string;
   /** Información del usuario */
   user: UserInfoDto;
 }

@@ -1,87 +1,157 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  taskControllerGetAllTasks,
-  taskControllerCreateTask,
-  taskControllerUpdateTaskById,
-  taskControllerDeleteTask,
-  taskControllerUpdateTaskState,
-  getTaskControllerGetAllTasksQueryOptions,
-  getTaskControllerCreateTaskMutationOptions,
-  getTaskControllerUpdateTaskByIdMutationOptions,
-  getTaskControllerDeleteTaskMutationOptions,
-  getTaskControllerUpdateTaskStateMutationOptions,
-} from '@/api/generated/tasks/tasks';
-import type {
-  TaskDto,
-  CreateTaskDto,
-  UpdateTaskDto,
-  UpdateTaskStateDto,
-} from '@/api/generated/models';
+import { useState, useEffect } from 'react';
+import { getTasks } from '@/api/generated/tasks/tasks';
+import getUser from '@/utils/auth';
+import { TaskDto, CreateTaskDto, UpdateTaskDto, UpdateTaskStateDto } from '@/api/generated';
+
+// Crear instancia de las funciones de tasks
+const tasksAPI = getTasks();
 
 // Hook para obtener todas las tareas
 export const useTasks = () => {
-  return useQuery({
-    ...getTaskControllerGetAllTasksQueryOptions(),
-  });
+  const [tasks, setTasks] = useState<TaskDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const GetAllTasksByUser = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const user = getUser.getUser();
+      
+      if (!user?.id) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      const response = await tasksAPI.taskControllerGetAllTasks(user.id);
+      setTasks(response);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar las tareas');
+      console.error('Error fetching tasks:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    GetAllTasksByUser();
+  }, []);
+
+  return {
+    data: tasks,
+    isLoading,
+    error,
+    refetch: GetAllTasksByUser,
+  };
 };
 
 // Hook para crear una nueva tarea
 export const useCreateTask = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    ...getTaskControllerCreateTaskMutationOptions(),
-    onSuccess: () => {
-      // Invalidar la query de tareas para refrescar la lista
-      queryClient.invalidateQueries({ queryKey: ['taskControllerGetAllTasks'] });
-    },
-    onError: (error) => {
-      console.error('Error creando tarea:', error);
-    },
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const createTask = async (taskData: CreateTaskDto) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await tasksAPI.taskControllerCreateTask(taskData);
+      return response;
+    } catch (err: any) {
+      setError(err.message || 'Error creando tarea');
+      console.error('Error creando tarea:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    mutate: createTask,
+    isLoading,
+    error,
+  };
 };
 
 // Hook para actualizar una tarea
 export const useUpdateTask = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    ...getTaskControllerUpdateTaskByIdMutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['taskControllerGetAllTasks'] });
-    },
-    onError: (error) => {
-      console.error('Error actualizando tarea:', error);
-    },
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const updateTask = async ({ id, ...taskData }: UpdateTaskDto & { id: string }) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await tasksAPI.taskControllerUpdateTaskById(id, taskData);
+      return response;
+    } catch (err: any) {
+      setError(err.message || 'Error actualizando tarea');
+      console.error('Error actualizando tarea:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    mutate: updateTask,
+    isLoading,
+    error,
+  };
 };
 
 // Hook para eliminar una tarea
 export const useDeleteTask = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    ...getTaskControllerDeleteTaskMutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['taskControllerGetAllTasks'] });
-    },
-    onError: (error) => {
-      console.error('Error eliminando tarea:', error);
-    },
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const deleteTask = async (id: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      await tasksAPI.taskControllerDeleteTask(id);
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Error eliminando tarea');
+      console.error('Error eliminando tarea:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    mutate: deleteTask,
+    isLoading,
+    error,
+  };
 };
 
 // Hook para actualizar el estado de una tarea
 export const useUpdateTaskState = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    ...getTaskControllerUpdateTaskStateMutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['taskControllerGetAllTasks'] });
-    },
-    onError: (error) => {
-      console.error('Error actualizando estado de tarea:', error);
-    },
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const updateTaskState = async ({ id, ...stateData }: { id: string } & UpdateTaskStateDto) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await tasksAPI.taskControllerUpdateTaskState(id, stateData);
+      return response;
+    } catch (err: any) {
+      setError(err.message || 'Error actualizando estado de tarea');
+      console.error('Error actualizando estado de tarea:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    mutate: updateTaskState,
+    isLoading,
+    error,
+  };
 };

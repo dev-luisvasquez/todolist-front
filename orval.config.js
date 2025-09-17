@@ -5,7 +5,7 @@ module.exports = {
       mode: 'tags-split',
       target: 'src/api/generated',
       schemas: 'src/api/generated/models',
-      client: 'react-query',
+      client: 'axios', // Cambiado de 'react-query' a 'axios'
       prettier: true,
       override: {
         mutator: {

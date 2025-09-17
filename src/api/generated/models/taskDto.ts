@@ -25,4 +25,6 @@ export interface TaskDto {
   created_at?: string;
   /** Fecha de última actualización de la tarea */
   updated_at?: string;
+  /** Fecha de finalización de la tarea */
+  completed_at?: string;
 }

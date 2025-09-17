@@ -14,7 +14,15 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    loginMutation.mutate({ data: formData });
+    try {
+      await loginMutation.mutate(formData); // Pasar directamente formData, no { data: formData }
+      // Redirigir después del login exitoso
+      if (typeof window !== 'undefined') {
+        window.location.href = '/home';
+      }
+    } catch (error) {
+      // El error ya se maneja en el hook
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,10 +88,10 @@ export default function LoginForm() {
           <div>
             <button
               type="submit"
-              disabled={loginMutation.isPending}
+              disabled={loginMutation.isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loginMutation.isPending ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              {loginMutation.isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </button>
           </div>
 

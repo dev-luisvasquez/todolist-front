@@ -5,527 +5,90 @@
  * API para gestión de tareas y usuarios
  * OpenAPI spec version: 1.0
  */
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult,
-} from "@tanstack/react-query";
-
 import type { UpdateUserDto, UserResponseDto } from ".././models";
 
 import { customInstance } from "../../mutator/custom-instance";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-/**
- * Actualiza la información de un usuario específico por su ID
- * @summary Actualizar usuario por ID
- */
-export const usersControllerUpdateUserById = (
-  id: string,
-  updateUserDto: UpdateUserDto,
-  options?: SecondParameter<typeof customInstance>,
-) => {
-  return customInstance<UserResponseDto>(
-    {
-      url: `/users/${id}`,
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      data: updateUserDto,
-    },
-    options,
-  );
-};
-
-export const getUsersControllerUpdateUserByIdMutationOptions = <
-  TError = null | null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof usersControllerUpdateUserById>>,
-    TError,
-    { id: string; data: UpdateUserDto },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof usersControllerUpdateUserById>>,
-  TError,
-  { id: string; data: UpdateUserDto },
-  TContext
-> => {
-  const mutationKey = ["usersControllerUpdateUserById"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof usersControllerUpdateUserById>>,
-    { id: string; data: UpdateUserDto }
-  > = (props) => {
-    const { id, data } = props ?? {};
-
-    return usersControllerUpdateUserById(id, data, requestOptions);
+export const getUsers = () => {
+  /**
+   * Actualiza la información de un usuario específico por su ID
+   * @summary Actualizar usuario por ID
+   */
+  const usersControllerUpdateUserById = (
+    id: string,
+    updateUserDto: UpdateUserDto,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<UserResponseDto>(
+      {
+        url: `/users/${id}`,
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        data: updateUserDto,
+      },
+      options,
+    );
   };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type UsersControllerUpdateUserByIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof usersControllerUpdateUserById>>
->;
-export type UsersControllerUpdateUserByIdMutationBody = UpdateUserDto;
-export type UsersControllerUpdateUserByIdMutationError = null | null;
-
-/**
- * @summary Actualizar usuario por ID
- */
-export const useUsersControllerUpdateUserById = <
-  TError = null | null,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof usersControllerUpdateUserById>>,
-      TError,
-      { id: string; data: UpdateUserDto },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof usersControllerUpdateUserById>>,
-  TError,
-  { id: string; data: UpdateUserDto },
-  TContext
-> => {
-  const mutationOptions =
-    getUsersControllerUpdateUserByIdMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Obtiene la información de un usuario específico por su ID
- * @summary Obtener usuario por ID
- */
-export const usersControllerGetUserById = (
-  id: string,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<UserResponseDto>(
-    { url: `/users/${id}`, method: "GET", signal },
-    options,
-  );
-};
-
-export const getUsersControllerGetUserByIdQueryKey = (id?: string) => {
-  return [`/users/${id}`] as const;
-};
-
-export const getUsersControllerGetUserByIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof usersControllerGetUserById>>,
-  TError = null,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersControllerGetUserById>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getUsersControllerGetUserByIdQueryKey(id);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof usersControllerGetUserById>>
-  > = ({ signal }) => usersControllerGetUserById(id, requestOptions, signal);
-
+  /**
+   * Obtiene la información de un usuario específico por su ID
+   * @summary Obtener usuario por ID
+   */
+  const usersControllerGetUserById = (
+    id: string,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<UserResponseDto>(
+      { url: `/users/${id}`, method: "GET" },
+      options,
+    );
+  };
+  /**
+   * Elimina un usuario específico por su ID
+   * @summary Eliminar usuario por ID
+   */
+  const usersControllerDeleteUserById = (
+    id: string,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<UserResponseDto>(
+      { url: `/users/${id}`, method: "DELETE" },
+      options,
+    );
+  };
+  /**
+   * Obtiene una lista de todos los usuarios registrados
+   * @summary Obtener todos los usuarios
+   */
+  const usersControllerGetAllUsers = (
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<UserResponseDto[]>(
+      { url: `/users`, method: "GET" },
+      options,
+    );
+  };
   return {
-    queryKey,
-    queryFn,
-    enabled: !!id,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof usersControllerGetUserById>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type UsersControllerGetUserByIdQueryResult = NonNullable<
-  Awaited<ReturnType<typeof usersControllerGetUserById>>
->;
-export type UsersControllerGetUserByIdQueryError = null;
-
-export function useUsersControllerGetUserById<
-  TData = Awaited<ReturnType<typeof usersControllerGetUserById>>,
-  TError = null,
->(
-  id: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersControllerGetUserById>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof usersControllerGetUserById>>,
-          TError,
-          Awaited<ReturnType<typeof usersControllerGetUserById>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useUsersControllerGetUserById<
-  TData = Awaited<ReturnType<typeof usersControllerGetUserById>>,
-  TError = null,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersControllerGetUserById>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof usersControllerGetUserById>>,
-          TError,
-          Awaited<ReturnType<typeof usersControllerGetUserById>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useUsersControllerGetUserById<
-  TData = Awaited<ReturnType<typeof usersControllerGetUserById>>,
-  TError = null,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersControllerGetUserById>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-/**
- * @summary Obtener usuario por ID
- */
-
-export function useUsersControllerGetUserById<
-  TData = Awaited<ReturnType<typeof usersControllerGetUserById>>,
-  TError = null,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersControllerGetUserById>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getUsersControllerGetUserByIdQueryOptions(id, options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-/**
- * Elimina un usuario específico por su ID
- * @summary Eliminar usuario por ID
- */
-export const usersControllerDeleteUserById = (
-  id: string,
-  options?: SecondParameter<typeof customInstance>,
-) => {
-  return customInstance<UserResponseDto>(
-    { url: `/users/${id}`, method: "DELETE" },
-    options,
-  );
-};
-
-export const getUsersControllerDeleteUserByIdMutationOptions = <
-  TError = null,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof usersControllerDeleteUserById>>,
-    TError,
-    { id: string },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof usersControllerDeleteUserById>>,
-  TError,
-  { id: string },
-  TContext
-> => {
-  const mutationKey = ["usersControllerDeleteUserById"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof usersControllerDeleteUserById>>,
-    { id: string }
-  > = (props) => {
-    const { id } = props ?? {};
-
-    return usersControllerDeleteUserById(id, requestOptions);
+    usersControllerUpdateUserById,
+    usersControllerGetUserById,
+    usersControllerDeleteUserById,
+    usersControllerGetAllUsers,
   };
-
-  return { mutationFn, ...mutationOptions };
 };
-
-export type UsersControllerDeleteUserByIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof usersControllerDeleteUserById>>
+export type UsersControllerUpdateUserByIdResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getUsers>["usersControllerUpdateUserById"]>
+  >
 >;
-
-export type UsersControllerDeleteUserByIdMutationError = null;
-
-/**
- * @summary Eliminar usuario por ID
- */
-export const useUsersControllerDeleteUserById = <
-  TError = null,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof usersControllerDeleteUserById>>,
-      TError,
-      { id: string },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof usersControllerDeleteUserById>>,
-  TError,
-  { id: string },
-  TContext
-> => {
-  const mutationOptions =
-    getUsersControllerDeleteUserByIdMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Obtiene una lista de todos los usuarios registrados
- * @summary Obtener todos los usuarios
- */
-export const usersControllerGetAllUsers = (
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<UserResponseDto[]>(
-    { url: `/users`, method: "GET", signal },
-    options,
-  );
-};
-
-export const getUsersControllerGetAllUsersQueryKey = () => {
-  return [`/users`] as const;
-};
-
-export const getUsersControllerGetAllUsersQueryOptions = <
-  TData = Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-  TError = unknown,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-      TError,
-      TData
-    >
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getUsersControllerGetAllUsersQueryKey();
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof usersControllerGetAllUsers>>
-  > = ({ signal }) => usersControllerGetAllUsers(requestOptions, signal);
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type UsersControllerGetAllUsersQueryResult = NonNullable<
-  Awaited<ReturnType<typeof usersControllerGetAllUsers>>
+export type UsersControllerGetUserByIdResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getUsers>["usersControllerGetUserById"]>>
 >;
-export type UsersControllerGetAllUsersQueryError = unknown;
-
-export function useUsersControllerGetAllUsers<
-  TData = Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-  TError = unknown,
->(
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-          TError,
-          Awaited<ReturnType<typeof usersControllerGetAllUsers>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useUsersControllerGetAllUsers<
-  TData = Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-  TError = unknown,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-          TError,
-          Awaited<ReturnType<typeof usersControllerGetAllUsers>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useUsersControllerGetAllUsers<
-  TData = Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-  TError = unknown,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-/**
- * @summary Obtener todos los usuarios
- */
-
-export function useUsersControllerGetAllUsers<
-  TData = Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-  TError = unknown,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersControllerGetAllUsers>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getUsersControllerGetAllUsersQueryOptions(options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
+export type UsersControllerDeleteUserByIdResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getUsers>["usersControllerDeleteUserById"]>
+  >
+>;
+export type UsersControllerGetAllUsersResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getUsers>["usersControllerGetAllUsers"]>>
+>;

@@ -46,7 +46,7 @@ export const DroppableColumn = ({ id, title, tasks, onEdit, onDelete }: Droppabl
         <div
             ref={setNodeRef}
             className={`
-                min-h-[500px] max-h-[600px] overflow-y-auto p-4 rounded-lg border-2 transition-all duration-300 ease-out
+                min-h-[500px]   p-4 rounded-lg border-2 transition-all duration-300 ease-out
                 ${getColumnStyles()}
                 ${isOver ? 'border-blue-400 bg-blue-100 scale-105 shadow-lg' : ''}
             `}
@@ -54,7 +54,7 @@ export const DroppableColumn = ({ id, title, tasks, onEdit, onDelete }: Droppabl
             <h2 className={`text-lg font-semibold mb-4 ${getTitleStyles()}`}>
                 {title} ({tasks.length})
             </h2>
-            
+
             {/* Indicador visual cuando se está arrastrando sobre la columna */}
             {isOver && (
                 <div className="absolute inset-0 bg-blue-200 bg-opacity-30 rounded-lg border-2 border-dashed border-blue-400 flex items-center justify-center pointer-events-none">
@@ -63,23 +63,25 @@ export const DroppableColumn = ({ id, title, tasks, onEdit, onDelete }: Droppabl
                     </div>
                 </div>
             )}
-            
-            <div className="space-y-3 relative z-10">
-                {tasks.map((task) => (
-                    <DraggableTask 
-                        key={task.id} 
-                        task={task} 
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                    />
-                ))}
-                
-                {tasks.length === 0 && (
-                    <div className="text-gray-400 text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                        No hay tareas en {title.toLowerCase()}
-                    </div>
-                )}
+            <div className='overflow-y-auto max-h-[520px] pr-1'>
+                <div className="space-y-3 relative z-10">
+                    {tasks.map((task) => (
+                        <DraggableTask
+                            key={task.id}
+                            task={task}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                        />
+                    ))}
+
+                    {tasks.length === 0 && (
+                        <div className="text-gray-400 text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                            No hay tareas en {title.toLowerCase()}
+                        </div>
+                    )}
+                </div>
             </div>
+
         </div>
     );
 };

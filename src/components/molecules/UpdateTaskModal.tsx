@@ -1,28 +1,38 @@
 'use client'
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { Dialog, DialogPanel, Transition, DialogTitle, TransitionChild } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { CreateTaskDto, CreateTaskDtoPriority, CreateTaskDtoState } from '@/api/generated'
+import { UpdateTaskDto, UpdateTaskDtoPriority, UpdateTaskDtoState, TaskDto } from '@/api/generated'
 
-interface CreateTaskModalProps {
+interface UpdateTaskModalProps {
     isOpen: boolean
     onClose: () => void
-    onSubmit: (taskData: Omit<CreateTaskDto, 'userId'>) => void
+    onSubmit: (taskData: UpdateTaskDto) => void
+    task: TaskDto | null
     isLoading?: boolean
 }
 
-export default function CreateTaskModal({ isOpen, onClose, onSubmit, isLoading = false }: CreateTaskModalProps) {
-    // Función para obtener el estado inicial del formulario
-    const getInitialFormState = (): Omit<CreateTaskDto, 'userId'> => ({
+export default function UpdateTaskModal({ isOpen, onClose, onSubmit, task, isLoading = false }: UpdateTaskModalProps) {
+    const [formData, setFormData] = useState<UpdateTaskDto>({
         title: '',
         description: '',
-        priority: CreateTaskDtoPriority.medium,
-        state: CreateTaskDtoState.pending
+        priority: UpdateTaskDtoPriority.medium,
+        state: UpdateTaskDtoState.pending
     })
 
-    const [formData, setFormData] = useState<Omit<CreateTaskDto, 'userId'>>(getInitialFormState())
-
     const [errors, setErrors] = useState<{ [key: string]: string }>({})
+
+    // Mapear los datos de la tarea cuando se abra el modal
+    useEffect(() => {
+        if (task && isOpen) {
+            setFormData({
+                title: task.title || '',
+                description: task.description || '',
+                priority: task.priority as UpdateTaskDtoPriority || UpdateTaskDtoPriority.medium,
+                state: task.state as UpdateTaskDtoState || UpdateTaskDtoState.pending
+            })
+        }
+    }, [task, isOpen])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -30,7 +40,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, isLoading =
         // Validación simple
         const newErrors: { [key: string]: string } = {}
         
-        if (!formData.title.trim()) {
+        if (!formData.title?.trim()) {
             newErrors.title = 'El título es requerido'
         }
         
@@ -41,17 +51,20 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, isLoading =
         
         setErrors({})
         onSubmit(formData)
-       // Limpiar el formulario después de enviar
-       setFormData(getInitialFormState())
     }
 
     const handleClose = () => {
-        setFormData(getInitialFormState())
+        setFormData({
+            title: '',
+            description: '',
+            priority: UpdateTaskDtoPriority.medium,
+            state: UpdateTaskDtoState.pending
+        })
         setErrors({})
         onClose()
     }
 
-    const handleChange = (field: keyof Omit<CreateTaskDto, 'userId'>, value: string) => {
+    const handleChange = (field: keyof UpdateTaskDto, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }))
         // Limpiar error del campo cuando el usuario empiece a escribir
         if (errors[field]) {
@@ -91,7 +104,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, isLoading =
                                         as="h3"
                                         className="text-lg font-medium leading-6 text-gray-900"
                                     >
-                                        Crear Nueva Tarea
+                                        Editar Tarea
                                     </DialogTitle>
                                     <button
                                         type="button"
@@ -148,31 +161,31 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, isLoading =
                                         <select
                                             id="priority"
                                             value={formData.priority}
-                                            onChange={(e) => handleChange('priority', e.target.value as CreateTaskDtoPriority)}
+                                            onChange={(e) => handleChange('priority', e.target.value as UpdateTaskDtoPriority)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             disabled={isLoading}
                                         >
-                                            <option value={CreateTaskDtoPriority.low}>Baja</option>
-                                            <option value={CreateTaskDtoPriority.medium}>Media</option>
-                                            <option value={CreateTaskDtoPriority.high}>Alta</option>
+                                            <option value={UpdateTaskDtoPriority.low}>Baja</option>
+                                            <option value={UpdateTaskDtoPriority.medium}>Media</option>
+                                            <option value={UpdateTaskDtoPriority.high}>Alta</option>
                                         </select>
                                     </div>
 
-                                    {/* Estado inicial */}
+                                    {/* Estado */}
                                     <div>
                                         <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Estado inicial
+                                            Estado
                                         </label>
                                         <select
                                             id="state"
                                             value={formData.state}
-                                            onChange={(e) => handleChange('state', e.target.value as CreateTaskDtoState)}
+                                            onChange={(e) => handleChange('state', e.target.value as UpdateTaskDtoState)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             disabled={isLoading}
                                         >
-                                            <option value={CreateTaskDtoState.pending}>Pendiente</option>
-                                            <option value={CreateTaskDtoState.in_progress}>En Progreso</option>
-                                            <option value={CreateTaskDtoState.completed}>Completada</option>
+                                            <option value={UpdateTaskDtoState.pending}>Pendiente</option>
+                                            <option value={UpdateTaskDtoState.in_progress}>En Progreso</option>
+                                            <option value={UpdateTaskDtoState.completed}>Completada</option>
                                         </select>
                                     </div>
 
@@ -191,7 +204,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, isLoading =
                                             className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                             disabled={isLoading}
                                         >
-                                            {isLoading ? 'Creando...' : 'Crear Tarea'}
+                                            {isLoading ? 'Actualizando...' : 'Actualizar Tarea'}
                                         </button>
                                     </div>
                                 </form>

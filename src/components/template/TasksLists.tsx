@@ -2,15 +2,18 @@
 import { useState, useMemo, useEffect } from "react";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { CardTask } from "../molecules/CardTaks";
-import { useTasks, useUpdateTaskState, useCreateTask } from "@/hooks/useTasks";
-import { TaskDto, TaskDtoState, CreateTaskDto } from "@/api/generated";
+import { useTasks, useUpdateTaskState, useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/useTasks";
+import { TaskDto, TaskDtoState, CreateTaskDto, UpdateTaskDto } from "@/api/generated";
 import { DroppableColumn } from "../molecules/DroppableColumn";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import CreateTaskModal from "../molecules/CreateTaskModal";
+import UpdateTaskModal from "../molecules/UpdateTaskModal";
 import getUser from "@/utils/auth";
+import { DateTime } from "luxon";
 
 export const TasksLists = () => {
     const [activeTask, setActiveTask] = useState<TaskDto | null>(null);
+    const [editingTask, setEditingTask] = useState<TaskDto | null>(null);
     const [optimisticTasks, setOptimisticTasks] = useState<TaskDto[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -18,6 +21,8 @@ export const TasksLists = () => {
     const { data: serverTasks, isLoading, error, refetch } = useTasks();
     const { mutate: updateTaskState } = useUpdateTaskState();
     const { mutate: createTask, isLoading: isCreatingTask } = useCreateTask();
+    const { mutate: deleteTask } = useDeleteTask();
+    const { mutate: updateTask } = useUpdateTask();
 
     // Sincronizar tareas del servidor con el estado optimista
     useEffect(() => {
@@ -96,28 +101,25 @@ export const TasksLists = () => {
         }
     };
 
-    const handleEditTask = (task: TaskDto) => {
-        // TODO: Implementar modal o formulario de edición
-        console.log('Editar tarea:', task);
-        alert(`Editar tarea: ${task.title}\n\nEsta funcionalidad se implementará próximamente.`);
+    const handleEditTask = (taskData: UpdateTaskDto) => {
+        if (!editingTask?.id) return;
+        try {
+            const updatedTask = { ...editingTask, ...taskData };
+            updateTask(updatedTask);
+            setEditingTask(null); // Cerrar el modal después de actualizar
+            serverTasks && setOptimisticTasks(prevTasks => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+        } catch (error) {
+            console.error('Error al actualizar la tarea:', error);
+            alert('Error al actualizar la tarea');
+        }
     };
 
     const handleDeleteTask = async (taskId: string) => {
-        if (!confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
-            return;
-        }
-
         try {
             // Actualización optimista: remover la tarea inmediatamente
-            const previousTasks = [...optimisticTasks];
             setOptimisticTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
-
-            // TODO: Implementar la función de eliminar en el hook
-            // await deleteTask(taskId);
-
-            console.log('Tarea eliminada:', taskId);
+            await deleteTask(taskId);
         } catch (error) {
-            console.error('Error al eliminar la tarea:', error);
             // Revertir en caso de error
             setOptimisticTasks(optimisticTasks);
             alert('Error al eliminar la tarea.');
@@ -137,15 +139,39 @@ export const TasksLists = () => {
                 userId: user.id
             };
 
+            // Crear una tarea temporal para la actualización optimista
+            const tempTask: TaskDto = {
+                id: `temp-${Date.now()}`, // ID temporal
+                title: taskData.title,
+                description: taskData.description || '',
+                priority: taskData.priority,
+                state: taskData.state,
+                userId: user.id,
+                created_at: DateTime.now().toISO(),
+                updated_at: DateTime.now().toISO()
+            };
+
+            
+
+            // Actualización optimista: agregar la tarea inmediatamente
+            setOptimisticTasks(prevTasks => [...prevTasks, tempTask]);
+            
+            // Cerrar el modal inmediatamente
+            setIsCreateModalOpen(false);
+
+            // Crear la tarea en el backend
             await createTask(fullTaskData);
             
-            // Refrescar las tareas para mostrar la nueva tarea
-            refetch();
             
-            // Cerrar el modal
-            setIsCreateModalOpen(false);
+            
         } catch (error) {
             console.error('Error al crear la tarea:', error);
+            
+            // Revertir la actualización optimista en caso de error
+            setOptimisticTasks(prevTasks => 
+                prevTasks.filter(task => !task.id.startsWith('temp-'))
+            );
+            
             alert('Error al crear la tarea');
         }
     };
@@ -204,7 +230,7 @@ export const TasksLists = () => {
                         id={TaskDtoState.pending}
                         title="Pendientes"
                         tasks={tasksByState.pending}
-                        onEdit={handleEditTask}
+                        onEdit={(task) => setEditingTask(task)}
                         onDelete={handleDeleteTask}
                     />
 
@@ -213,7 +239,7 @@ export const TasksLists = () => {
                         id={TaskDtoState.in_progress}
                         title="En Progreso"
                         tasks={tasksByState.in_progress}
-                        onEdit={handleEditTask}
+                        onEdit={(task) => setEditingTask(task)}
                         onDelete={handleDeleteTask}
                     />
 
@@ -222,7 +248,7 @@ export const TasksLists = () => {
                         id={TaskDtoState.completed}
                         title="Completadas"
                         tasks={tasksByState.completed}
-                        onEdit={handleEditTask}
+                        onEdit={(task) => setEditingTask(task)}
                         onDelete={handleDeleteTask}
                     />
                 </div>
@@ -241,6 +267,14 @@ export const TasksLists = () => {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSubmit={handleCreateTask}
+                isLoading={isCreatingTask}
+            />
+           
+            <UpdateTaskModal
+                isOpen={!!editingTask}
+                task={editingTask}
+                onClose={() => setEditingTask(null)}
+                onSubmit={handleEditTask}
                 isLoading={isCreatingTask}
             />
         </>

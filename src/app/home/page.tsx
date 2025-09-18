@@ -1,9 +1,11 @@
-import { TaskPage } from "@/components/pages/TaskPage";
+
 
 
 function Home() {
     return (
-            <TaskPage />
+       <>
+       <h1>Aca van los graficos</h1>
+       </>    
     );
 }
 export default Home;

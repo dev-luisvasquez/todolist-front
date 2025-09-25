@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useLogin } from '@/hooks/useAuth';
 import type { AuthDto } from '@/api/generated/models';
+import Link from 'next/link';
 
 export default function LoginForm() {
   const [formData, setFormData] = useState<AuthDto>({
@@ -85,6 +86,15 @@ export default function LoginForm() {
             </div>
           )}
 
+          <div className="text-end">
+            <Link
+              href="/auth/send-email-recover"
+              className="font-medium text-indigo-600 hover:text-indigo-500"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
+
           <div>
             <button
               type="submit"
@@ -96,12 +106,12 @@ export default function LoginForm() {
           </div>
 
           <div className="text-center">
-            <a
+            <Link
               href="/auth/signup"
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
               ¿No tienes cuenta? Regístrate aquí
-            </a>
+            </Link>
           </div>
         </form>
       </div>

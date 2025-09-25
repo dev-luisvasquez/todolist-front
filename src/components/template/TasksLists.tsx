@@ -9,7 +9,6 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import CreateTaskModal from "../molecules/CreateTaskModal";
 import UpdateTaskModal from "../molecules/UpdateTaskModal";
 import getUser from "@/utils/auth";
-import { DateTime } from "luxon";
 
 export const TasksLists = () => {
     const [activeTask, setActiveTask] = useState<TaskDto | null>(null);
@@ -66,6 +65,12 @@ export const TasksLists = () => {
 
         // Si el estado no cambió, no hacer nada
         if (currentTask.state === newState) return;
+
+        // No procesar tareas con IDs temporales (por seguridad)
+        if (taskId.startsWith('temp-')) {
+            alert('Error: La tarea aún se está creando. Por favor, espera un momento.');
+            return;
+        }
 
         // Guardar el estado anterior para poder revertir en caso de error
         const previousTasks = [...optimisticTasks];
@@ -139,39 +144,19 @@ export const TasksLists = () => {
                 userId: user.id
             };
 
-            // Crear una tarea temporal para la actualización optimista
-            const tempTask: TaskDto = {
-                id: `temp-${Date.now()}`, // ID temporal
-                title: taskData.title,
-                description: taskData.description || '',
-                priority: taskData.priority,
-                state: taskData.state,
-                userId: user.id,
-                created_at: DateTime.now().toISO(),
-                updated_at: DateTime.now().toISO()
-            };
-
-            
-
-            // Actualización optimista: agregar la tarea inmediatamente
-            setOptimisticTasks(prevTasks => [...prevTasks, tempTask]);
-            
-            // Cerrar el modal inmediatamente
-            setIsCreateModalOpen(false);
-
             // Crear la tarea en el backend
-            await createTask(fullTaskData);
+            const newTask = await createTask(fullTaskData);
             
+            // Actualizar la UI con la tarea creada del servidor
+            if (newTask) {
+                setOptimisticTasks(prevTasks => [...prevTasks, newTask]);
+            }
             
+            // Cerrar el modal después de crear exitosamente
+            setIsCreateModalOpen(false);
             
         } catch (error) {
             console.error('Error al crear la tarea:', error);
-            
-            // Revertir la actualización optimista en caso de error
-            setOptimisticTasks(prevTasks => 
-                prevTasks.filter(task => !task.id.startsWith('temp-'))
-            );
-            
             alert('Error al crear la tarea');
         }
     };
@@ -220,7 +205,7 @@ export const TasksLists = () => {
                 {/* Instrucciones para móviles */}
                 <div className="md:hidden mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-sm text-blue-800 text-center">
-                        💡 <strong>Móvil:</strong> Mantén presionado una tarea para ver opciones o arrástrala entre columnas
+                        💡 <strong>Móvil:</strong> Mantén presionado una tarea y arrástrala entre las columnas
                     </p>
                 </div>
 

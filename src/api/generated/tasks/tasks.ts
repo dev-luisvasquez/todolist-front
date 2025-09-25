@@ -8,6 +8,7 @@
 import type {
   CreateTaskDto,
   DeleteMultipleTasksDto,
+  TaskControllerGetAllTasksParams,
   TaskDto,
   UpdateTaskDto,
   UpdateTaskStateDto,
@@ -19,15 +20,16 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const getTasks = () => {
   /**
-   * Obtiene una lista de todas las tareas registradas en el sistema
+   * Obtiene una lista de todas las tareas registradas en el sistema, opcionalmente filtradas por estado
    * @summary Obtener todas las tareas por id de usuario
    */
   const taskControllerGetAllTasks = (
     id: string,
+    params?: TaskControllerGetAllTasksParams,
     options?: SecondParameter<typeof customInstance>,
   ) => {
     return customInstance<TaskDto[]>(
-      { url: `/tasks/user/${id}`, method: "GET" },
+      { url: `/tasks/user/${id}`, method: "GET", params },
       options,
     );
   };

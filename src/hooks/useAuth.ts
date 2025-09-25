@@ -15,9 +15,9 @@ export const useLogin = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const response = await authAPI.authControllerSignIn(credentials);
-      
+
       // Guardar tokens y usuario
       if (response.access_Token) {
         AuthStorage.setAccessToken(response.access_Token);
@@ -28,7 +28,7 @@ export const useLogin = () => {
       if (response.user) {
         AuthStorage.setUser(response.user);
       }
-      
+
       return response;
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión';
@@ -56,9 +56,9 @@ export const useRegister = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const response = await authAPI.authControllerSignUp(userData);
-      
+
       // Guardar tokens y usuario después del registro
       if (response.access_Token) {
         AuthStorage.setAccessToken(response.access_Token);
@@ -69,7 +69,7 @@ export const useRegister = () => {
       if (response.user) {
         AuthStorage.setUser(response.user);
       }
-      
+
       return response;
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Error al registrar usuario';
@@ -106,7 +106,7 @@ export const useAuth = () => {
     const checkAuth = () => {
       const authStatus = AuthStorage.isAuthenticated();
       const userData = AuthStorage.getUser();
-      
+
       setIsAuthenticated(authStatus);
       setUser(userData);
       setIsLoading(false);
@@ -114,10 +114,77 @@ export const useAuth = () => {
 
     checkAuth();
   }, []);
-  
+
   return {
     isAuthenticated,
     isLoading,
     user,
+  };
+};
+
+// Hook para enviar email de recuperación de contraseña
+export const useSendRecoverEmail = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const sendRecoverEmail = async (email: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      setSuccess(false);
+
+      await authAPI.authControllerRequestPasswordRecovery({ email });
+      setSuccess(true);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al enviar email de recuperación';
+      setError(errorMessage);
+      console.error('Error sending recovery email:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  return {
+    mutate: sendRecoverEmail,
+    isLoading,
+    error,
+    success,
+  };
+};
+
+// Hook para recuperar contraseña
+export const useRecoverPassword = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const recoverPassword = async (newPassword: string, token: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      setSuccess(false);
+
+      await authAPI.authControllerRecoverPassword({ newPassword }, {
+        headers: {
+          'authorization': `Bearer ${token}`
+        }
+      });
+      setSuccess(true);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al recuperar contraseña';
+      setError(errorMessage);
+      console.error('Error recovering password:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    mutate: recoverPassword,
+    isLoading,
+    error,
+    success,
   };
 };

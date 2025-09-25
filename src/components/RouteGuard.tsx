@@ -14,7 +14,7 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   // Rutas públicas que no requieren autenticación
-  const publicRoutes = ['/auth/signin', '/auth/signup'];
+  const publicRoutes = ['/auth/signin', '/auth/signup', '/auth/send-email-recover', '/auth/reset-password'];
   
   // Verificar si la ruta actual es pública
   const isPublicRoute = publicRoutes.includes(pathname);

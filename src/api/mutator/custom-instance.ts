@@ -47,33 +47,88 @@ axiosInstance.interceptors.response.use(
         const refreshToken = AuthStorage.getRefreshToken();
         
         if (refreshToken) {
+          // Validar si el refresh token es válido (no expirado)
+          try {
+            const payload = JSON.parse(atob(refreshToken.split('.')[1]));
+            const currentTime = Math.floor(Date.now() / 1000);
+            
+            // Si el refresh token ya expiró, limpiar storage
+            if (payload.exp && payload.exp < currentTime) {
+              console.log('Refresh token expirado, limpiando storage...');
+              AuthStorage.clear();
+              
+              if (typeof window !== 'undefined') {
+                window.location.href = '/auth/signin';
+              }
+              return Promise.reject(new Error('Refresh token expirado'));
+            }
+          } catch (tokenError) {
+            console.error('Error al validar refresh token:', tokenError);
+            // Si hay error al decodificar el token, es inválido
+            AuthStorage.clear();
+            
+            if (typeof window !== 'undefined') {
+              window.location.href = '/auth/signin';
+            }
+            return Promise.reject(new Error('Refresh token inválido'));
+          }
+          
           const refreshResponse = await axiosInstance.post('/auth/refresh-token', {}, {
             headers: {
               'x-refresh-token': refreshToken,
             },
           });
           
-          const { access_token, user } = refreshResponse.data;
+          const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data;
           
-          // Guardar el nuevo token usando nuestras utilidades
-          AuthStorage.setAccessToken(access_token);
-          AuthStorage.setUser(user);
+          // Guardar los nuevos tokens
+          AuthStorage.setAccessToken(accessToken);
           
-          // Si viene un nuevo refresh token en los headers, guardarlo también
-          const newRefreshToken = refreshResponse.headers['x-refresh-token'];
           if (newRefreshToken) {
             AuthStorage.setRefreshToken(newRefreshToken);
           }
           
+          // También verificar si viene en los headers como respaldo
+          const headerRefreshToken = refreshResponse.headers['x-refresh-token'];
+          if (headerRefreshToken) {
+            AuthStorage.setRefreshToken(headerRefreshToken);
+          }
+          
           // Actualizar el header de la petición original con el nuevo token
-          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           
           // Reintentar la petición original
           return axiosInstance(originalRequest);
+        } else {
+          // Si no hay refresh token, limpiar storage y redirigir
+          AuthStorage.clear();
+          
+          if (typeof window !== 'undefined') {
+            window.location.href = '/auth/signin';
+          }
+          return Promise.reject(new Error('No hay refresh token disponible'));
         }
       } catch (refreshError) {
         console.error('Error al refrescar el token:', refreshError);
-        // Si el refresh falló, limpiar todo y redirigir al login
+        
+        // Si el refresh token también devuelve 401, significa que ya no es válido
+        if (
+          typeof refreshError === 'object' &&
+          refreshError !== null &&
+          'response' in refreshError &&
+          (refreshError as any).response?.status === 401
+        ) {
+          console.log('Refresh token rechazado por el servidor (401), limpiando storage...');
+          AuthStorage.clear();
+          
+          if (typeof window !== 'undefined') {
+            window.location.href = '/auth/signin';
+          }
+          
+          return Promise.reject(new Error('Refresh token no válido'));
+        }
+        
+        // Para otros errores de refresh, también limpiar por seguridad
         AuthStorage.clear();
         
         if (typeof window !== 'undefined') {

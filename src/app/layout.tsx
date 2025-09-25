@@ -30,7 +30,7 @@ export default function RootLayout({
         <QueryProvider>
           <RouteGuard>
             <ConditionalHeader />
-            {children}
+            <main className="container mx-auto p-4">{children}</main>
           </RouteGuard>
         </QueryProvider>
       </body>

@@ -15,5 +15,4 @@ export interface UserInfoDto {
   last_name: string;
   /** Correo electrónico del usuario */
   email: string;
-  /** URL del avatar del usuario */
 }

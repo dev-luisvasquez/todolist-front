@@ -8,7 +8,7 @@ import { DroppableColumn } from "../molecules/DroppableColumn";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import CreateTaskModal from "../molecules/CreateTaskModal";
 import UpdateTaskModal from "../molecules/UpdateTaskModal";
-import getUser from "@/utils/auth";
+import AuthStorage from "@/utils/auth";
 
 export const TasksLists = () => {
     const [activeTask, setActiveTask] = useState<TaskDto | null>(null);
@@ -133,7 +133,7 @@ export const TasksLists = () => {
 
     const handleCreateTask = async (taskData: Omit<CreateTaskDto, 'userId'>) => {
         try {
-            const user = getUser.getUser();
+            const user = AuthStorage.getUser();
             if (!user?.id) {
                 alert('Error: Usuario no autenticado');
                 return;
@@ -199,7 +199,7 @@ export const TasksLists = () => {
 
     return (
         <>
-            <h1 className="text-3xl font-bold">Lista de tareas</h1>
+            <h1 className="text-3xl font-semibold">Lista de tareas</h1>
             <button onClick={() => setIsCreateModalOpen(true)} className="my-4 border p-3 border-gray-300 flex bg-white text-gray-700 hover:bg-gray-100 rounded">Nueva Tarea <PlusIcon className="w-6 font-bold ml-2" /></button>
             <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                 {/* Instrucciones para móviles */}

@@ -7,6 +7,8 @@
  */
 
 export interface CreateUserDto {
+  /** Avatar del usuario (URL de la imagen) */
+  avatar?: string;
   /**
    * Nombre del usuario
    * @minLength 1

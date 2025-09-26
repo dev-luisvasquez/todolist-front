@@ -1,10 +1,10 @@
 'use client';
 
-import { TaskDtoState } from "@/api/generated";
+import { KpiControllerGetTasksByPriority200Item } from '@/api/generated/models/kpiControllerGetTasksByPriority200Item'
 import { Doughnut } from "react-chartjs-2";
-import { useKpiDistributionTasks } from "@/hooks/useKpi";
+import { useKpiTasksByPriority } from "@/hooks/useKpi";
 import { useEffect, useState } from "react";
-import { TranslateState} from "@/utils/translate";
+import { TranslateState, TranslatePriority } from "@/utils/translate";
 import {
     Chart as ChartJS,
     ArcElement,
@@ -16,11 +16,12 @@ import {
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 // Colores para el gráfico donut
-const COLORS = {
-    'pending': '#fbbf24', // Amarillo
-    'in_progress': '#3b82f6', // Azul
-    'completed': '#10b981', // Verde  
-};
+const Colors = {
+    'low': '#34d399', // Verde
+    'medium': '#fbbf24', // Amarillo
+    'high': '#f87171', // Rojo
+    'none': '#9ca3af', // Gris
+}
 
 // Función para obtener nombres de estado más amigables
 const getStateName = (state: string): string => {
@@ -28,20 +29,15 @@ const getStateName = (state: string): string => {
         'PENDING': 'Pendientes',
         'IN_PROGRESS': 'En Progreso',
         'COMPLETED': 'Completadas',
-       
+
     };
     return stateNames[state] || state;
 };
 
-interface ChartData {
-    name: string;
-    value: number;
-    color: string;
-    [key: string]: any;
-}
 
-export const TasksDistributionChart = () => {
-    const [chartData, setChartData] = useState<ChartData[]>([]);
+
+export const TasksByPriorityChart = () => {
+    const [chartData, setChartData] = useState<KpiControllerGetTasksByPriority200Item[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [total, setTotal] = useState<number>(0);
@@ -51,22 +47,9 @@ export const TasksDistributionChart = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const result = await useKpiDistributionTasks();
-                console.log('Chart data result:', result);
-                
-                if (result && result.distribution) {
-                    const transformedData: ChartData[] = result.distribution.map((item) => ({
-                        name: TranslateState(item.state || ''),
-                        value: item.count || 0,
-                        color: COLORS[item.state as keyof typeof COLORS] || '#6b7280'
-                    }));
-                    
-                    setChartData(transformedData);
-                    setTotal(result.total || 0);
-                } else {
-                    setChartData([]);
-                    setTotal(0);
-                }
+                const result = await useKpiTasksByPriority();
+                setChartData(result || []);
+                setTotal(result.reduce((sum, item) => sum + (item.count || 0), 0));
             } catch (err) {
                 setError('Error al cargar los datos del gráfico');
                 console.error(err);
@@ -79,11 +62,11 @@ export const TasksDistributionChart = () => {
     }, []);
 
     const chartJsData = {
-        labels: chartData.map(item => item.name),
+        labels: chartData.map(item => item.priority ? TranslatePriority(item.priority) : 'Sin Prioridad'),
         datasets: [
             {
-                data: chartData.map(item => item.value),
-                backgroundColor: chartData.map(item => item.color),
+                data: chartData.map(item => item.count || 0),
+                backgroundColor: chartData.map(item => Colors[item.priority as keyof typeof Colors] || '#6b7280'),
                 borderColor: '#ffffff',
                 borderWidth: 2,
             },
@@ -103,7 +86,7 @@ export const TasksDistributionChart = () => {
             },
             title: {
                 display: true,
-                text: 'Distribución de Tareas',
+                text: 'Tareas Pendientes por Prioridad',
                 font: {
                     size: 16,
                     weight: 'bold',
@@ -111,7 +94,7 @@ export const TasksDistributionChart = () => {
             },
             tooltip: {
                 callbacks: {
-                    label: function(context) {
+                    label: function (context) {
                         const label = context.label || '';
                         const value = context.parsed || 0;
                         const percentage = total > 0 ? ((value / total) * 100).toFixed(0) : '0';
@@ -129,7 +112,7 @@ export const TasksDistributionChart = () => {
 
     return (
         <div className="shadow-lg p-4 w-full min-h-[400px] bg-white rounded-lg text-center hover:scale-102 transition-transform">
-            
+
             <div className="relative w-full h-80 mt-4">
                 {loading ? (
                     <div className="flex items-center justify-center h-full">

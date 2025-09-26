@@ -9,6 +9,8 @@
 export interface UserResponseDto {
   /** ID único del usuario */
   id: string;
+  /** Avatar del usuario (URL de la imagen) */
+  avatar: string;
   /** Nombre del usuario */
   name: string;
   /** Apellido del usuario */

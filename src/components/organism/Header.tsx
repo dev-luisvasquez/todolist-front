@@ -26,15 +26,16 @@ import {
     XMarkIcon,
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
-import { useLocalStorageUser } from '@/hooks/useUser'
+import { useUserState } from '@/hooks/useGlobalUser'
 import { useLogout } from '@/hooks/useAuth'
 import { generateInitials } from '@/utils/initials'
 
 
 export default function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { user, isLoading, isAuthenticated } = useLocalStorageUser();
+    const { user, isLoading, isAuthenticated } = useUserState();
     const logout = useLogout();
+    const [avatarError, setAvatarError] = useState(false);
 
     // No mostrar el header si está cargando o el usuario no está autenticado
     if (isLoading || !user) {
@@ -67,26 +68,38 @@ export default function Header() {
                     </Link>
                     <Menu as="div" className="relative">
                         <MenuButton className="flex items-center gap-2 text-sm font-semibold text-white hover:text-gray-300 transition-colors">
-                            <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
-                                <span className="text-sm font-medium text-white">
-                                    {user ? generateInitials(user.name || '', user.last_name || '') : 'U'}
-                                </span>
-                            </div>
+                            {user.avatar && !avatarError ? (
+                                <img
+                                    src={user.avatar}
+                                    alt={`Avatar de ${user.name || ''} ${user.last_name || ''}`.trim() || 'Avatar del usuario'}
+                                    className="h-8 w-8 rounded-full object-cover"
+                                    onError={() => setAvatarError(true)}
+                                    onLoad={() => avatarError && setAvatarError(false)}
+                                    referrerPolicy="no-referrer"
+                                />
+                            ) : (
+                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                    <span className="text-sm font-medium text-white">
+                                        {user ? generateInitials(user.name || '', user.last_name || '') : 'U'}
+                                    </span>
+                                </div>
+                            )}
+
                             {user ? `${user.name || ''} ${user.last_name || ''}`.trim() || 'Usuario' : 'Usuario'}
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </MenuButton>
-                        <MenuItems 
+                        <MenuItems
                             className="absolute left-0 top-10 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
                         >
                             <div className="py-1">
                                 <MenuItem>
                                     <Link
-                                        href="/profile" 
-                                        className="flex items-center px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 transition-colors cursor-not-allowed"
-                                        tabIndex={-1}
-                                        aria-disabled="true"
+                                        href="/profile"
+                                        className="flex items-center px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 transition-colors"
+
+
                                     >
                                         <svg className="mr-3 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -110,7 +123,7 @@ export default function Header() {
                                 </MenuItem>
                                 <hr className="my-1 border-gray-200" />
                                 <MenuItem>
-                                    <button 
+                                    <button
                                         onClick={logout}
                                         className="flex items-center w-full px-4 py-2 text-sm text-red-700 data-focus:bg-red-50 transition-colors"
                                     >

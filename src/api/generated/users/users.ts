@@ -5,7 +5,11 @@
  * API para gestión de tareas y usuarios
  * OpenAPI spec version: 1.0
  */
-import type { UpdateUserDto, UserResponseDto } from ".././models";
+import type {
+  UpdateUserDto,
+  UserResponseDto,
+  UsersControllerUpdateUserAvatarBody,
+} from ".././models";
 
 import { customInstance } from "../../mutator/custom-instance";
 
@@ -13,17 +17,16 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const getUsers = () => {
   /**
-   * Actualiza la información de un usuario específico por su ID
-   * @summary Actualizar usuario por ID
+   * Actualiza la información del usuario autenticado basado en el token JWT
+   * @summary Actualizar perfil del usuario autenticado
    */
   const usersControllerUpdateUserById = (
-    id: string,
     updateUserDto: UpdateUserDto,
     options?: SecondParameter<typeof customInstance>,
   ) => {
     return customInstance<UserResponseDto>(
       {
-        url: `/users/${id}`,
+        url: `/users/profile`,
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         data: updateUserDto,
@@ -69,11 +72,35 @@ export const getUsers = () => {
       options,
     );
   };
+  /**
+   * Actualiza el avatar del usuario autenticado. Elimina automáticamente el avatar anterior si existe.
+   * @summary Actualizar avatar del usuario
+   */
+  const usersControllerUpdateUserAvatar = (
+    usersControllerUpdateUserAvatarBody: UsersControllerUpdateUserAvatarBody,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    const formData = new FormData();
+    if (usersControllerUpdateUserAvatarBody.file !== undefined) {
+      formData.append(`file`, usersControllerUpdateUserAvatarBody.file);
+    }
+
+    return customInstance<UserResponseDto>(
+      {
+        url: `/users/profile/avatar`,
+        method: "PUT",
+        headers: { "Content-Type": "multipart/form-data" },
+        data: formData,
+      },
+      options,
+    );
+  };
   return {
     usersControllerUpdateUserById,
     usersControllerGetUserById,
     usersControllerDeleteUserById,
     usersControllerGetAllUsers,
+    usersControllerUpdateUserAvatar,
   };
 };
 export type UsersControllerUpdateUserByIdResult = NonNullable<
@@ -91,4 +118,9 @@ export type UsersControllerDeleteUserByIdResult = NonNullable<
 >;
 export type UsersControllerGetAllUsersResult = NonNullable<
   Awaited<ReturnType<ReturnType<typeof getUsers>["usersControllerGetAllUsers"]>>
+>;
+export type UsersControllerUpdateUserAvatarResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getUsers>["usersControllerUpdateUserAvatar"]>
+  >
 >;

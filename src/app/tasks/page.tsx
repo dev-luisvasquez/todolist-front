@@ -1,6 +1,6 @@
 import { TaskPage } from "@/components/pages/TaskPage";
 
-function TasksPage() {
+const TasksPage = () => {
     return (
          <TaskPage />
     )

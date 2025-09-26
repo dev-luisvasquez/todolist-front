@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getTasks } from '@/api/generated/tasks/tasks';
-import getUser from '@/utils/auth';
+import { useUserStore } from '@/stores/userStore';
 import { TaskDto, CreateTaskDto, UpdateTaskDto, UpdateTaskStateDto } from '@/api/generated';
 
 // Crear instancia de las funciones de tasks
@@ -11,17 +11,16 @@ export const useTasks = () => {
   const [tasks, setTasks] = useState<TaskDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useUserStore();
 
   const GetAllTasksByUser = async () => {
     try {
+      if (!user?.id) {
+        // No intentar cargar todavía si el usuario no está listo
+        return;
+      }
       setIsLoading(true);
       setError(null);
-      const user = getUser.getUser();
-      
-      if (!user?.id) {
-        throw new Error('Usuario no encontrado');
-      }
-
       const response = await tasksAPI.taskControllerGetAllTasks(user.id);
       setTasks(response);
     } catch (err: unknown) {
@@ -33,9 +32,11 @@ export const useTasks = () => {
     }
   };
 
+  // Cargar cuando el usuario esté disponible o cambie
   useEffect(() => {
     GetAllTasksByUser();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   return {
     data: tasks,

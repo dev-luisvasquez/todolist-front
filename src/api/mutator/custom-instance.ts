@@ -79,7 +79,7 @@ axiosInstance.interceptors.response.use(
             },
           });
           
-          const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data;
+          const { access_Token: accessToken, refresh_Token: newRefreshToken } = refreshResponse.data;
           
           // Guardar los nuevos tokens
           AuthStorage.setAccessToken(accessToken);

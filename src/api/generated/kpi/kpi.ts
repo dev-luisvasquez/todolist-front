@@ -32,14 +32,14 @@ export const getKpi = () => {
     );
   };
   /**
-   * Devuelve la cantidad de tareas agrupadas por su nivel de prioridad para el usuario autenticado.
-   * @summary Obtener distribución de tareas por prioridad
+   * Devuelve la cantidad de tareas pendientes agrupadas por su nivel de prioridad para el usuario autenticado.
+   * @summary Obtener distribución de tareas pendientes por prioridad
    */
   const kpiControllerGetTasksByPriority = (
     options?: SecondParameter<typeof customInstance>,
   ) => {
     return customInstance<KpiControllerGetTasksByPriority200Item[]>(
-      { url: `/kpi/tasks-by-priority`, method: "GET" },
+      { url: `/kpi/tasks-pending-by-priority`, method: "GET" },
       options,
     );
   };

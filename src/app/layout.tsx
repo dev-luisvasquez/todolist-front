@@ -4,6 +4,8 @@ import "./globals.css";
 import QueryProvider from "@/components/QueryProvider";
 import ConditionalHeader from "@/components/ConditionalHeader";
 import RouteGuard from "@/components/RouteGuard";
+import { UserStoreProvider } from "@/components/UserStoreProvider";
+import {Toaster} from "react-hot-toast"
 
 
 const poppins = Poppins({
@@ -25,14 +27,18 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${poppins.variable} ${poppins.className} antialiased`}
+        className={`${poppins.variable} ${poppins.className} antialiased min-h-screen`}
       >
         <QueryProvider>
-          <RouteGuard>
-            <ConditionalHeader />
-            <main className="container mx-auto p-4">{children}</main>
-          </RouteGuard>
+          <UserStoreProvider>
+            <RouteGuard>
+              <ConditionalHeader />
+              <Toaster />
+              <main className="container mx-auto p-4">{children}</main>
+            </RouteGuard>
+          </UserStoreProvider>
         </QueryProvider>
+        
       </body>
     </html>
   );

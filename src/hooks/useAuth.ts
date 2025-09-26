@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { getAuth } from '@/api/generated/auth/auth';
 import { AuthDto, CreateUserDto } from '@/api/generated';
 import AuthStorage from '@/utils/auth';
+import { useUserActions } from '@/hooks/useGlobalUser';
+import { UserResponseDto } from '@/api/generated';
 
 // Crear instancia de las funciones de auth
 const authAPI = getAuth();
@@ -10,6 +12,7 @@ const authAPI = getAuth();
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setUser } = useUserActions();
 
   const login = async (credentials: AuthDto) => {
     try {
@@ -26,7 +29,13 @@ export const useLogin = () => {
         AuthStorage.setRefreshToken(response.refresh_Token);
       }
       if (response.user) {
-        AuthStorage.setUser(response.user);
+        // Usar directamente los datos que vienen del backend sin forzar avatar vacío
+        const userForStorage = {
+          ...response.user,
+          created_at: (response as any).created_at,
+          updated_at: (response as any).updated_at
+        } as UserResponseDto;
+        setUser(userForStorage);
       }
 
       return response;
@@ -51,6 +60,7 @@ export const useLogin = () => {
 export const useRegister = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setUser } = useUserActions();
 
   const register = async (userData: CreateUserDto) => {
     try {
@@ -67,7 +77,12 @@ export const useRegister = () => {
         AuthStorage.setRefreshToken(response.refresh_Token);
       }
       if (response.user) {
-        AuthStorage.setUser(response.user);
+        const userForStorage = {
+          ...response.user,
+          created_at: (response as any).created_at,
+          updated_at: (response as any).updated_at
+        } as any;
+        setUser(userForStorage);
       }
 
       return response;
@@ -90,8 +105,11 @@ export const useRegister = () => {
 
 // Hook para logout
 export const useLogout = () => {
+  const { clearUser } = useUserActions();
+  
   return () => {
     AuthStorage.clear();
+    clearUser();
     window.location.href = '/auth/signin';
   };
 };

@@ -7,18 +7,20 @@
  */
 
 export interface UpdateUserDto {
-  /**
-   * Nombre del usuario
-   * @minLength 1
-   */
+  /** ID único del usuario */
+  id?: string;
+  /** Avatar del usuario (URL de la imagen) */
+  avatar?: string;
+  /** Nombre del usuario */
   name?: string;
-  /**
-   * Apellido del usuario
-   * @minLength 1
-   */
+  /** Apellido del usuario */
   last_name?: string;
   /** Correo electrónico del usuario */
   email?: string;
   /** Fecha de nacimiento del usuario */
   birthday?: string;
+  /** Fecha de creación del usuario */
+  created_at?: string;
+  /** Fecha de última actualización del usuario */
+  updated_at?: string;
 }

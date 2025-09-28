@@ -35,6 +35,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
+    "eslint-plugin-prettier": "^5.5.4",
     "orval": "^7.11.2",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",

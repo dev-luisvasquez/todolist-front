@@ -4,6 +4,7 @@ import { AuthDto, CreateUserDto } from '@/api/generated';
 import AuthStorage from '@/utils/auth';
 import { useUserActions } from '@/hooks/useGlobalUser';
 import { UserResponseDto } from '@/api/generated';
+import { useRouter } from 'next/navigation'
 
 // Crear instancia de las funciones de auth
 const authAPI = getAuth();
@@ -106,11 +107,14 @@ export const useRegister = () => {
 // Hook para logout
 export const useLogout = () => {
   const { clearUser } = useUserActions();
+  const router = useRouter();
   
   return () => {
-    AuthStorage.clear();
+    // Limpiar estado global y storage (desmonta vistas privadas vía RouteGuard)
     clearUser();
-    window.location.href = '/auth/signin';
+
+    // Navegar sin recargar la página
+    router.replace('/auth/signin');
   };
 };
 

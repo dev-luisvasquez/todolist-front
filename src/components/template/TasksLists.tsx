@@ -9,12 +9,15 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import CreateTaskModal from "../molecules/CreateTaskModal";
 import UpdateTaskModal from "../molecules/UpdateTaskModal";
 import AuthStorage from "@/utils/auth";
+import { useGlobalUser } from "@/hooks/useGlobalUser";
 
 export const TasksLists = () => {
     const [activeTask, setActiveTask] = useState<TaskDto | null>(null);
     const [editingTask, setEditingTask] = useState<TaskDto | null>(null);
     const [optimisticTasks, setOptimisticTasks] = useState<TaskDto[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    const { user, isAuthenticated } = useGlobalUser();
 
     // Usar el hook que ahora usa Axios directamente
     const { data: serverTasks, isLoading, error, refetch } = useTasks();
@@ -133,15 +136,15 @@ export const TasksLists = () => {
 
     const handleCreateTask = async (taskData: Omit<CreateTaskDto, 'userId'>) => {
         try {
-            const user = AuthStorage.getUser();
-            if (!user?.id) {
+            console.log(isAuthenticated);
+            if (isAuthenticated === false) {
                 alert('Error: Usuario no autenticado');
                 return;
             }
 
             const fullTaskData: CreateTaskDto = {
                 ...taskData,
-                userId: user.id
+                userId: user?.id || ''
             };
 
             // Crear la tarea en el backend

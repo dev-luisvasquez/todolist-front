@@ -16,7 +16,10 @@ export const useTasks = () => {
   const GetAllTasksByUser = async () => {
     try {
       if (!user?.id) {
-        // No intentar cargar todavía si el usuario no está listo
+        // Sin usuario: no cargar, limpiar y no mostrar error
+        setTasks([]);
+        setIsLoading(false);
+        setError(null);
         return;
       }
       setIsLoading(true);
@@ -24,7 +27,7 @@ export const useTasks = () => {
       const response = await tasksAPI.taskControllerGetAllTasks(user.id);
       setTasks(response);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar las tareas';
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar tareas';
       setError(errorMessage);
       console.error('Error fetching tasks:', err);
     } finally {
@@ -32,10 +35,8 @@ export const useTasks = () => {
     }
   };
 
-  // Cargar cuando el usuario esté disponible o cambie
   useEffect(() => {
     GetAllTasksByUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   return {

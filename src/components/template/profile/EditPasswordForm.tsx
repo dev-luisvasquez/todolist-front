@@ -1,54 +1,118 @@
+// Componentes
+import { ButtonAction } from "@/components/atoms/buttons/ButtonAction";
+import { InputPasswordForm } from "@/components/atoms/InputForm";
+
+// Hooks
+import { useState } from "react";
+
+// Utils
+import { ErrorToast, PromiseToast } from "@/utils/toasts";
+
+// API 
+import { useChangePassword } from "@/hooks/useAuth";
+
+// Validaciones
+import { passwordSchema } from "@/validation/validationForm";
+import { ValidationError } from "yup";
+
+
 
 
 export const EditPasswordForm = () => {
+    const [passwords, setNewPassword] = useState({
+        oldPassword: "",
+        newPassword: "",
+        confirmNewPassword: ""
+    });
+
+    const { mutate: changePassword, isLoading, error } = useChangePassword();
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setNewPassword((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleChangePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Mapeo al esquema (currentPassword vs oldPassword)
+        const dataToValidate = {
+            currentPassword: passwords.oldPassword,
+            newPassword: passwords.newPassword,
+            confirmNewPassword: passwords.confirmNewPassword,
+        };
+
+        try {
+            // Valida con Yup (reúne todos los errores)
+            await passwordSchema.validate(dataToValidate, { abortEarly: false });
+
+            // Si pasa la validación, procede con el cambio
+            await PromiseToast(
+                changePassword(passwords.oldPassword, passwords.newPassword),
+                {
+                    loading: "Actualizando contraseña...",
+                    success: "Contraseña actualizada",
+                    error: "Error al actualizar la contraseña, intente de nuevo",
+                }
+            );
+
+            setNewPassword({
+                oldPassword: "",
+                newPassword: "",
+                confirmNewPassword: ""
+            });
+        } catch (err) {
+            if (err instanceof ValidationError) {
+                // Muestra todos los mensajes de error de Yup
+                ErrorToast(err.errors.join("\n"));
+                return;
+            }
+            return;
+        }
+    }
+
+    const isTyping = Object.values(passwords).some((v) => v.trim() !== "");
+
     return (
         <div>
-             <h2 className="text-xl font-semibold text-gray-800 mb-6">Cambio de Contraseña</h2>
-           <form className="space-y-4">
-            <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                    Contraseña Actual
-                </label>
-                <input
-                    type="password"
-                    id="currentPassword"
-                    name="currentPassword"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Tu contraseña actual"
+            <h2 className="text-xl font-semibold text-gray-800 mb-6">Cambio de Contraseña</h2>
+            <form className="space-y-4" onSubmit={handleChangePassword}>
+                <InputPasswordForm
+                    label="Contraseña Actual"
+                    name="oldPassword"
+                    value={passwords.oldPassword}
+                    onChange={handleInputChange}
                 />
-            </div>
-            <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
-                    Nueva Contraseña
-                </label>
-                <input
-                    type="password"
-                    id="newPassword"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Ingrese su nueva contraseña"
+                <InputPasswordForm
+                    label="Nueva Contraseña"
+                    name="newPassword"
+                    value={passwords.newPassword}
+                    onChange={handleInputChange}
                 />
-            </div>
-            <div>
-                <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700">
-                    Confirmar Nueva Contraseña
-                </label>
-                <input
-                    type="password"
-                    id="confirmNewPassword"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Confirme su nueva contraseña"
+                <InputPasswordForm
+                    label="Confirmar Nueva Contraseña"
+                    name="confirmNewPassword"
+                    value={passwords.confirmNewPassword}
+                    onChange={handleInputChange}
                 />
-            </div>
-            <div className="flex justify-end">
-                <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                    Cambiar Contraseña
-                </button>
-            </div>
-        </form> 
-        </div>
-        
+                <div className="flex justify-end">
+                    {isLoading ? (
+                        <ButtonAction
+                            typeButton="submit"
+                            text="Actualizando Contraseña..."
+                            typeAction="save"
+                            disabled={true}
+                        />
+                    ) : (
+                        <ButtonAction
+                            typeButton="submit"
+                            text="Actualizar Contraseña"
+                            typeAction="save"
+                            disabled={!isTyping}
+                        />
+                    )}
+                </div>
+            </form >
+        </div >
     );
 };

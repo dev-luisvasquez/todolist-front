@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useUserState } from '@/hooks/useGlobalUser';
 
 interface RouteGuardProps {
@@ -10,25 +10,35 @@ interface RouteGuardProps {
 
 const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() || '/';
+  const searchParams = useSearchParams();
   const { isAuthenticated, isLoading } = useUserState();
 
-  const publicRoutes = ['/auth/signin', '/auth/signup', '/auth/send-email-recover', '/auth/reset-password'];
-  const isPublicRoute = publicRoutes.includes(pathname);
+  // Rutas de autenticación (públicas)
+  const isAuthRoute = pathname.startsWith('/auth');
+  // Permitir estas rutas de /auth incluso si hay sesión (para cerrar sesión, por ejemplo)
+  const allowWhileAuthenticated =
+    pathname === '/auth/signout' || pathname === '/auth/logout';
 
   useEffect(() => {
     if (isLoading) return;
-
-    if (isPublicRoute) {
-      if (isAuthenticated) {
-        router.replace('/home');
+    // Si hay sesión, no permitir ir a /auth/* (excepto logout/signout)
+    if (isAuthenticated) {
+      if (isAuthRoute && !allowWhileAuthenticated) {
+        const requestedNext = searchParams.get('next') || '/';
+        // Evita bucles redirigiendo a home si el next apunta a /auth/*
+        const safeNext = requestedNext.startsWith('/auth') ? '/' : requestedNext;
+        router.replace(safeNext);
       }
-    } else {
-      if (!isAuthenticated) {
-        router.replace('/auth/signin');
-      }
+      return;
     }
-  }, [isAuthenticated, isLoading, pathname, router, isPublicRoute]);
+
+    // Si no hay sesión, no permitir rutas privadas
+    if (!isAuthRoute) {
+      const next = encodeURIComponent(pathname);
+      router.replace(`/auth/signin?next=${next}`);
+    }
+  }, [isAuthenticated, isLoading, isAuthRoute, allowWhileAuthenticated, pathname, router, searchParams]);
 
   // Loading global
   if (isLoading) {
@@ -39,13 +49,13 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
     );
   }
 
-  // No renderizar vistas privadas sin sesión (evita disparar efectos)
-  if (!isPublicRoute && !isAuthenticated) {
+  // Bloquear render en rutas de auth cuando hay sesión (para evitar parpadeo)
+  if (isAuthenticated && isAuthRoute && !allowWhileAuthenticated) {
     return null;
   }
 
-  // Evitar parpadeo en rutas públicas si ya hay sesión
-  if (isPublicRoute && isAuthenticated) {
+  // Bloquear render en rutas privadas cuando no hay sesión
+  if (!isAuthenticated && !isAuthRoute) {
     return null;
   }
 

@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  AuthControllerChangePasswordBody,
   AuthControllerRecoverPasswordBody,
   AuthControllerRequestPasswordRecoveryBody,
   AuthDto,
@@ -102,12 +103,31 @@ export const getAuth = () => {
       options,
     );
   };
+  /**
+   * Cambia la contraseña del usuario autenticado
+   * @summary Cambiar contraseña
+   */
+  const authControllerChangePassword = (
+    authControllerChangePasswordBody: AuthControllerChangePasswordBody,
+    options?: SecondParameter<typeof customInstance>,
+  ) => {
+    return customInstance<null>(
+      {
+        url: `/auth/change-password`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: authControllerChangePasswordBody,
+      },
+      options,
+    );
+  };
   return {
     authControllerSignUp,
     authControllerSignIn,
     authControllerRefreshToken,
     authControllerRecoverPassword,
     authControllerRequestPasswordRecovery,
+    authControllerChangePassword,
   };
 };
 export type AuthControllerSignUpResult = NonNullable<
@@ -129,5 +149,10 @@ export type AuthControllerRequestPasswordRecoveryResult = NonNullable<
     ReturnType<
       ReturnType<typeof getAuth>["authControllerRequestPasswordRecovery"]
     >
+  >
+>;
+export type AuthControllerChangePasswordResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getAuth>["authControllerChangePassword"]>
   >
 >;

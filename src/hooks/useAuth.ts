@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuth } from '@/api/generated/auth/auth';
-import { AuthDto, CreateUserDto } from '@/api/generated';
+import { AuthDto, CreateUserDto, AuthControllerChangePasswordBody } from '@/api/generated';
 import AuthStorage from '@/utils/auth';
 import { useUserActions } from '@/hooks/useGlobalUser';
 import { UserResponseDto } from '@/api/generated';
@@ -210,3 +210,34 @@ export const useRecoverPassword = () => {
     success,
   };
 };
+
+// Hook para cambiar la contraseña (usuario autenticado)
+export const useChangePassword = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const changePassword = async (oldPassword: string, newPassword: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      setSuccess(false);
+
+      await authAPI.authControllerChangePassword({ oldPassword, newPassword });
+      setSuccess(true);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al cambiar la contraseña';
+      setError(errorMessage);
+      console.error('Error changing password:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }
+  return {
+    mutate: changePassword,
+    isLoading,
+    error,
+    success,
+  };
+}

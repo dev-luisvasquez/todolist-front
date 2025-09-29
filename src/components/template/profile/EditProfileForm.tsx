@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useUser, useUpdateUser } from "@/hooks/useUser";
 import { useGlobalUser } from "@/hooks/useGlobalUser";
 import { useUploadFile } from "@/hooks/useFile";
@@ -6,13 +6,17 @@ import { UpdateUserDto } from "@/api/generated/models/updateUserDto";
 import { PromiseToast, ErrorToast } from "@/utils/toasts";
 import { generateInitials } from "@/utils/initials";
 
+// Componentes
+import { InputForm } from "@/components/atoms/InputForm";
+import { ButtonAction } from "@/components/atoms/buttons/ButtonAction";
+import { AvatarPicker } from "@/components/atoms/AvatarPicker";
+
 
 export const EditProfileForm = () => {
   const { data: userData, isLoading: userLoading, refetch } = useUser();
   const { mutate: updateUser } = useUpdateUser();
   const { uploadFile, isLoading: uploadLoading } = useUploadFile();
   const { updateUser: updateGlobalUser } = useGlobalUser();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Estado para manejar modo edición y error de avatar
   const [isEditing, setIsEditing] = useState(false);
@@ -64,16 +68,9 @@ export const EditProfileForm = () => {
     }));
   };
 
-  const handleAvatarClick = () => {
+  // Reemplaza handleFileChange por una versión que no actualice usuario ni borre el avatar anterior
+  const handleAvatarSelected = async (file: File) => {
     if (!isEditing) return;
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isEditing) return;
-
-    const file = e.target.files?.[0];
-    if (!file) return;
 
     if (!userData?.id) {
       ErrorToast("No se encontró el usuario");
@@ -82,8 +79,8 @@ export const EditProfileForm = () => {
 
     const uploadData = {
       file,
-      folder: `${userData.id}/avatars`,
-      oldImageUrl: formData.avatar,
+      folder: `${userData.id}/avatars/drafts`, // opcional: usar carpeta temporal
+      // No enviar oldImageUrl aquí para no borrar el avatar actual hasta guardar
     };
 
     const uploadPromise = uploadFile(uploadData);
@@ -97,7 +94,7 @@ export const EditProfileForm = () => {
     try {
       const response = await uploadPromise;
       if (response?.url) {
-        // Solo actualizamos el estado local; el update del usuario se hará al guardar
+        // Solo actualiza el formulario local; se confirmará en Guardar
         setFormData((prev) => ({ ...prev, avatar: response.url }));
       }
     } catch (error) {
@@ -176,47 +173,14 @@ export const EditProfileForm = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Avatar Section */}
           <div className="flex flex-col items-center space-y-4 pb-6 border-b border-gray-200">
-            <div className="relative">
-              <div
-                className={`w-24 h-24 rounded-full ${
-                  isEditing ? "cursor-pointer" : "cursor-default"
-                } overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-semibold shadow-lg transition-all duration-300 ${
-                  isEditing ? "hover:shadow-xl hover:scale-105" : ""
-                }`}
-                onClick={handleAvatarClick}
-              >
-                {formData.avatar && !avatarError ? (
-                  <img
-                    src={formData.avatar}
-                    alt={`Avatar de ${formData.name || ""} ${formData.last_name || ""}`.trim() || "Avatar del usuario"}
-                    className="w-full h-full object-cover"
-                    onError={() => setAvatarError(true)}
-                    onLoad={() => avatarError && setAvatarError(false)}
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span>{generateInitials(formData.name, formData.last_name)}</span>
-                )}
-              </div>
-              {isEditing && (
-                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-colors shadow-lg">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  </svg>
-                </div>
-              )}
-              {uploadLoading && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                </div>
-              )}
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
+            <AvatarPicker
+              imageUrl={formData.avatar || ""}
+              initials={generateInitials(formData.name || "", formData.last_name || "")}
+              isEditing={isEditing}
+              loading={uploadLoading}
+              onFileSelected={(file) => {
+                handleAvatarSelected(file);
+              }}
             />
             <p className="text-sm text-gray-500 text-center">
               {isEditing
@@ -226,111 +190,73 @@ export const EditProfileForm = () => {
           </div>
 
           {/* Form Fields */}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Nombre */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                disabled={!isEditing}
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:text-gray-600"
-                placeholder="Tu nombre"
-              />
-            </div>
-
-            {/* Apellido */}
-            <div>
-              <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-2">
-                Apellido
-              </label>
-              <input
-                type="text"
-                id="last_name"
-                name="last_name"
-                disabled={!isEditing}
-                value={formData.last_name}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:text-gray-600"
-                placeholder="Tu apellido"
-              />
-            </div>
+            <InputForm
+              label="Nombre"
+              name="name"
+              placeholder="Tu nombre"
+              value={formData.name || ""}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+            />
+              {/* Apellido */}
+            <InputForm
+              label="Apellido"
+              name="last_name"
+              placeholder="Tu apellido"
+              value={formData.last_name || ""}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+            />
 
             {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Correo Electrónico
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                disabled={!isEditing}
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:text-gray-600"
-                placeholder="tu@email.com"
-              />
-            </div>
+            <InputForm
+              label="Correo Electrónico"
+              name="email"
+              placeholder="tu@email.com"
+              value={formData.email || ""}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+            />
 
             {/* Fecha de Nacimiento */}
-            <div>
-              <label htmlFor="birthday" className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha de Nacimiento
-              </label>
-              <input
-                type="date"
-                id="birthday"
-                name="birthday"
-                disabled={!isEditing}
-                value={formData.birthday}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:text-gray-600"
-              />
-            </div>
+            <InputForm
+              label="Fecha de Nacimiento"
+              name="birthday"
+              type="date"
+              placeholder="YYYY-MM-DD"
+              value={formData.birthday || ""}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+            />
           </div>
 
           {/* Action Buttons */}
           <div className="pt-6 border-t border-gray-200">
             <div className="flex justify-end space-x-4">
               {!isEditing ? (
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                  className="px-8 py-3 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors"
-                >
-                  Editar
-                </button>
+                <ButtonAction text="Editar" onClick={() => setIsEditing(true)} typeAction="edit" />
               ) : (
                 <>
-                  <button
-                    type="button"
+                  <ButtonAction
                     onClick={() => {
                       setFormData(initialData);
                       setIsEditing(false);
                       setAvatarError(false);
                     }}
-                    className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={!hasChanges || isSaving}
-                    aria-busy={isSaving}
-                    className={`px-8 py-3 text-white font-bold rounded-lg transition-colors ${
-                      hasChanges && !isSaving
-                        ? "bg-blue-500 hover:bg-blue-700"
-                        : "bg-blue-300 cursor-not-allowed"
-                    }`}
-                  >
-                    {isSaving ? "Guardando..." : hasChanges ? "Guardar Cambios" : "No hay cambios"}
-                  </button>
+                    text="Cancelar"
+                    typeAction="cancel"
+                  />
+                  {isEditing && (
+                    <ButtonAction
+                      typeButton="submit"
+                      text={isSaving ? "Guardando..." : "Guardar"}
+                      disabled={!hasChanges || isSaving}
+                      typeAction="save"
+                    />
+                  )}
                 </>
               )}
             </div>

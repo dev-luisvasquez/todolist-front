@@ -51,3 +51,4 @@ export * from "./uploadFromUrlDto";
 export * from "./userInfoDto";
 export * from "./userResponseDto";
 export * from "./usersControllerUpdateUserAvatarBody";
+export * from "./authControllerChangePasswordBody";

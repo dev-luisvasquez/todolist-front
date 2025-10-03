@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -20,7 +19,7 @@ export default function SendEmailRecover() {
             await sendRecoverEmailMutation.mutate(formData.email); // Pasar solo el email como string
             // Redirigir después del registro exitoso
             alert('Correo de recuperación enviado. Revisa tu bandeja de entrada.');
-        } catch (error) {
+        } catch {
             // El error ya se maneja en el hook
         }
     }

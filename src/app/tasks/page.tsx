@@ -1,3 +1,4 @@
+'use client';
 import { TaskPage } from "@/components/pages/TaskPage";
 
 const TasksPage = () => {

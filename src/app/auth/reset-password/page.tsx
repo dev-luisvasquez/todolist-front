@@ -1,18 +1,9 @@
-'use client';
-
-import { RecoverPasswordPage } from "@/components/pages/RecoverPasswordPage";
-import { useSearchParams } from 'next/navigation';
-
-function RecoverPassword() {
-    const searchParams = useSearchParams();
-    const token = searchParams.get('token');
-
-    console.log(token);
+import { RecoverPasswordPage } from '@/components/pages/RecoverPasswordPage';
+import { Suspense } from 'react';
+export default function RecoverPassword() {
     return (
-        <RecoverPasswordPage token={token} />
-    )
+        <Suspense fallback={<div>Loading...</div>}>
+            <RecoverPasswordPage />
+        </Suspense>
+    );
 }
-
-export default RecoverPassword;
-      
-                

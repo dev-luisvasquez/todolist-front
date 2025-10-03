@@ -30,6 +30,8 @@ export function useAsyncData<T>(
 
     useEffect(() => {
         fetchData();
+        // Nota: fetchData no depende de props externos aquí; si asyncFunction cambia, queremos re-ejecutarlo.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return {

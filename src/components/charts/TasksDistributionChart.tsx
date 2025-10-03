@@ -1,8 +1,7 @@
 'use client';
 
-import { TaskDtoState } from "@/api/generated";
 import { Doughnut } from "react-chartjs-2";
-import { useKpiDistributionTasks } from "@/hooks/useKpi";
+import { fetchKpiDistributionTasks } from "@/hooks/useKpi";
 import { useEffect, useState } from "react";
 import { TranslateState} from "@/utils/translate";
 import {
@@ -22,22 +21,12 @@ const COLORS = {
     'completed': '#10b981', // Verde  
 };
 
-// Función para obtener nombres de estado más amigables
-const getStateName = (state: string): string => {
-    const stateNames: Record<string, string> = {
-        'PENDING': 'Pendientes',
-        'IN_PROGRESS': 'En Progreso',
-        'COMPLETED': 'Completadas',
-       
-    };
-    return stateNames[state] || state;
-};
 
 interface ChartData {
     name: string;
     value: number;
     color: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export const TasksDistributionChart = () => {
@@ -51,8 +40,8 @@ export const TasksDistributionChart = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const result = await useKpiDistributionTasks();
-                console.log('Chart data result:', result);
+                const result = await fetchKpiDistributionTasks();
+               
                 
                 if (result && result.distribution) {
                     const transformedData: ChartData[] = result.distribution.map((item) => ({

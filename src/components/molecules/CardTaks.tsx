@@ -1,10 +1,8 @@
 'use client'
-import { Card } from "../atoms/Card";
 import { TaskDto } from "@/api/generated";
-import { Checkbox } from '@headlessui/react'
 import { useState } from "react";
 import  {DateTime} from "luxon";
-import { EyeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 interface CardTaskProps extends TaskDto {
     onEdit?: (task: TaskDto) => void;

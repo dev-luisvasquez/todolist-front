@@ -25,7 +25,7 @@ export const useUserStore = create<UserState>()(
   persist(
     (set, get) => ({
       user: null,
-      isLoading: false, // Cambiar a false porque Zustand persist maneja la carga automáticamente
+      isLoading: true, // Cambiar a false porque Zustand persist maneja la carga automáticamente
       isAuthenticated: false,
       error: null,
 
@@ -38,7 +38,7 @@ export const useUserStore = create<UserState>()(
           email: user.email,
           avatar: user.avatar,
           // incluir birthday si existe
-          ...(user as any).birthday !== undefined && { birthday: (user as any).birthday }
+          ...(user as UserResponseDto).birthday !== undefined && { birthday: (user as UserResponseDto).birthday }
         } as UserResponseDto;
         set({
           user: safeUser,
@@ -69,7 +69,7 @@ export const useUserStore = create<UserState>()(
             // permitir actualizar avatar si viene incluso string vacio (para borrarlo) -> usar hasOwnProperty
             ...(Object.prototype.hasOwnProperty.call(userData, 'avatar') && { avatar: userData.avatar }),
             // birthday opcional
-            ...(Object.prototype.hasOwnProperty.call(userData, 'birthday') && { birthday: (userData as any).birthday })
+            ...(Object.prototype.hasOwnProperty.call(userData, 'birthday') && { birthday: (userData as UserResponseDto).birthday })
           } as Partial<UserResponseDto>;
           
           const updatedUser = { ...currentUser, ...safeUserData } as UserResponseDto;
@@ -111,17 +111,26 @@ export const useUserStore = create<UserState>()(
           last_name: state.user.last_name,
           email: state.user.email,
           avatar: state.user.avatar,
-          ...(state.user as any).birthday !== undefined && { birthday: (state.user as any).birthday }
+          ...(state.user as UserResponseDto).birthday !== undefined && { birthday: (state.user as UserResponseDto).birthday }
         } : null,
         isAuthenticated: state.isAuthenticated,
         // Deliberadamente NO persistimos isLoading ni error
       }),
+      onRehydrateStorage: () => (state) => {
+        // Cuando termine la hidratación, quitamos el loading
+        state?.setLoading(false);
+      },
       // Migrar datos existentes para remover campos sensibles
-      migrate: (persistedState: any, version: number) => {
-        if (persistedState.user && typeof persistedState.user === 'object') {
-          const { password, ...safeUserData } = persistedState.user;
+      migrate: (persistedState: unknown, _version?: number): unknown => {
+        if (
+          persistedState &&
+          typeof persistedState === 'object' &&
+          'user' in persistedState &&
+          typeof (persistedState as UserState).user === 'object'
+        ) {
+          const { password: _password, ...safeUserData } = ((persistedState as UserState).user as unknown) as Record<string, unknown>;
           return {
-            ...persistedState,
+            ...(persistedState as object),
             user: safeUserData
           };
         }

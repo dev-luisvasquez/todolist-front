@@ -187,11 +187,6 @@ export const EditProfileForm = () => {
                 ? "Haz clic en la imagen para cambiar tu avatar"
                 : "Avatar del perfil"}
             </p>
-            {avatarError && (
-              <p className="text-sm text-red-500 text-center">
-                {avatarError}
-              </p>
-            )}
           </div>
 
           {/* Form Fields */}
@@ -206,7 +201,8 @@ export const EditProfileForm = () => {
               onChange={handleInputChange}
               disabled={!isEditing}
             />
-              {/* Apellido */}
+
+            {/* Apellido */}
             <InputForm
               label="Apellido"
               name="last_name"
@@ -218,56 +214,56 @@ export const EditProfileForm = () => {
 
             {/* Email */}
             <InputForm
-              label="Correo Electrónico"
+              label="Email"
               name="email"
-              placeholder="tu@email.com"
+              placeholder="tu@ejemplo.com"
               value={formData.email || ""}
               onChange={handleInputChange}
               disabled={!isEditing}
             />
 
-            {/* Fecha de Nacimiento */}
+            {/* Birthday */}
             <InputForm
               label="Fecha de Nacimiento"
               name="birthday"
-              type="date"
               placeholder="YYYY-MM-DD"
               value={formData.birthday || ""}
               onChange={handleInputChange}
+              type="date"
               disabled={!isEditing}
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="pt-6 border-t border-gray-200">
-            <div className="flex justify-end space-x-4">
-              {!isEditing ? (
-                <ButtonAction text="Editar" onClick={() => setIsEditing(true)} typeAction="edit" />
-              ) : (
-                <>
-                  <ButtonAction
-                    onClick={() => {
-                      setFormData(initialData);
-                      setIsEditing(false);
-                      setAvatarError(false);
-                    }}
-                    text="Cancelar"
-                    typeAction="cancel"
-                  />
-                  {isEditing && (
-                    <ButtonAction
-                      typeButton="submit"
-                      text={isSaving ? "Guardando..." : "Guardar"}
-                      disabled={!hasChanges || isSaving}
-                      typeAction="save"
-                    />
-                  )}
-                </>
-              )}
-            </div>
+          <div className="flex justify-end gap-2">
+            {isEditing ? (
+              <>
+                <ButtonAction
+                  typeButton="button"
+                  text="Cancelar"
+                  typeAction="cancel"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setFormData(initialData);
+                  }}
+                />
+                <ButtonAction
+                  typeButton="submit"
+                  text={isSaving ? "Guardando..." : "Guardar"}
+                  typeAction="save"
+                  disabled={!hasChanges || isSaving}
+                />
+              </>
+            ) : (
+              <ButtonAction
+                typeButton="button"
+                text="Editar"
+                typeAction="edit"
+                onClick={() => setIsEditing(true)}
+              />
+            )}
           </div>
         </form>
       )}
     </div>
   );
-};
+}

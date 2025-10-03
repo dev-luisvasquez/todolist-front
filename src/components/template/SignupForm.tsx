@@ -24,7 +24,7 @@ export default function SignupForm() {
             if (typeof window !== 'undefined') {
                 window.location.href = '/auth/signin';
             }
-        } catch (error) {
+        } catch {
             // El error ya se maneja en el hook
         }
     }

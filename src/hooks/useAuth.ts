@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getAuth } from '@/api/generated/auth/auth';
-import { AuthDto, CreateUserDto, AuthControllerChangePasswordBody } from '@/api/generated';
+import { AuthDto, CreateUserDto,UserResponseDto } from '@/api/generated';
 import AuthStorage from '@/utils/auth';
 import { useUserActions } from '@/hooks/useGlobalUser';
-import { UserResponseDto } from '@/api/generated';
 import { useRouter } from 'next/navigation'
 
 // Crear instancia de las funciones de auth
@@ -33,8 +32,8 @@ export const useLogin = () => {
         // Usar directamente los datos que vienen del backend sin forzar avatar vacío
         const userForStorage = {
           ...response.user,
-          created_at: (response as any).created_at,
-          updated_at: (response as any).updated_at
+          created_at: (response as unknown as UserResponseDto).created_at,
+          updated_at: (response as unknown as UserResponseDto).updated_at
         } as UserResponseDto;
         setUser(userForStorage);
       }
@@ -80,9 +79,9 @@ export const useRegister = () => {
       if (response.user) {
         const userForStorage = {
           ...response.user,
-          created_at: (response as any).created_at,
-          updated_at: (response as any).updated_at
-        } as any;
+          created_at: (response as unknown as UserResponseDto).created_at,
+          updated_at: (response as unknown as UserResponseDto).updated_at
+        } as UserResponseDto;
         setUser(userForStorage);
       }
 

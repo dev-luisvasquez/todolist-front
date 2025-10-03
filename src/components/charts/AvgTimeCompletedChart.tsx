@@ -1,7 +1,9 @@
+'use client';
+
 import { Bar } from "react-chartjs-2";
 import { KpiControllerGetAvgCompletionTime200Item } from "@/api/generated";
 import { FormatTime, TranslatePriority } from "@/utils/translate";
-import { useKpiAvgTasksCompletedTime } from "@/hooks/useKpi";
+import { fetchKpiAvgTasksCompletedTime } from "@/hooks/useKpi";
 import { useEffect, useState } from "react";
 import {
     Chart as ChartJS,
@@ -40,8 +42,7 @@ export const AvgTimeCompletedChart = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const result = await useKpiAvgTasksCompletedTime();
-                console.log('Chart data result:', result);
+                const result = await fetchKpiAvgTasksCompletedTime();
                 setData(result);
             } catch (err) {
                 setError('Error al cargar los datos del gráfico');

@@ -3,26 +3,16 @@
 import { useState } from 'react'
 import {
     Dialog,
-    DialogPanel,
-    Disclosure,
-    DisclosureButton,
-    DisclosurePanel,
+    DialogPanel,   
     Menu,
     MenuButton,
     MenuItems,
     MenuItem,
-    Popover,
-    PopoverButton,
     PopoverGroup,
-    PopoverPanel,
+   
 } from '@headlessui/react'
 import {
-    ArrowPathIcon,
     Bars3Icon,
-    ChartPieIcon,
-    CursorArrowRaysIcon,
-    FingerPrintIcon,
-    SquaresPlusIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
@@ -33,7 +23,7 @@ import { generateInitials } from '@/utils/initials'
 
 export default function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { user, isLoading, isAuthenticated } = useUserState();
+    const { user, isLoading } = useUserState();
     const logout = useLogout();
     const [avatarError, setAvatarError] = useState(false);
 
@@ -69,6 +59,8 @@ export default function Header() {
                     <Menu as="div" className="relative">
                         <MenuButton className="flex items-center gap-2 text-sm font-semibold text-white hover:text-gray-300 transition-colors">
                             {user.avatar && !avatarError ? (
+                                // Mantener <img> por compatibilidad; usar next/image no es posible con referrerPolicy en algunos casos.
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                     src={user.avatar}
                                     alt={`Avatar de ${user.name || ''} ${user.last_name || ''}`.trim() || 'Avatar del usuario'}
@@ -78,12 +70,12 @@ export default function Header() {
                                     referrerPolicy="no-referrer"
                                 />
                             ) : (
-                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                                    <span className="text-sm font-medium text-white">
-                                        {user ? generateInitials(user.name || '', user.last_name || '') : 'U'}
-                                    </span>
-                                </div>
-                            )}
+                                 <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                     <span className="text-sm font-medium text-white">
+                                         {user ? generateInitials(user.name || '', user.last_name || '') : 'U'}
+                                     </span>
+                                 </div>
+                             )}
 
                             {user ? `${user.name || ''} ${user.last_name || ''}`.trim() || 'Usuario' : 'Usuario'}
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

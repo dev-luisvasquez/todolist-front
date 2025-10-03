@@ -2,9 +2,9 @@
 
 import { KpiControllerGetTasksByPriority200Item } from '@/api/generated/models/kpiControllerGetTasksByPriority200Item'
 import { Doughnut } from "react-chartjs-2";
-import { useKpiTasksByPriority } from "@/hooks/useKpi";
+import { fetchKpiTasksByPriority } from "@/hooks/useKpi";
 import { useEffect, useState } from "react";
-import { TranslateState, TranslatePriority } from "@/utils/translate";
+import { TranslatePriority } from "@/utils/translate";
 import {
     Chart as ChartJS,
     ArcElement,
@@ -23,17 +23,6 @@ const Colors = {
     'none': '#9ca3af', // Gris
 }
 
-// Función para obtener nombres de estado más amigables
-const getStateName = (state: string): string => {
-    const stateNames: Record<string, string> = {
-        'PENDING': 'Pendientes',
-        'IN_PROGRESS': 'En Progreso',
-        'COMPLETED': 'Completadas',
-
-    };
-    return stateNames[state] || state;
-};
-
 
 
 export const TasksByPriorityChart = () => {
@@ -47,9 +36,9 @@ export const TasksByPriorityChart = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const result = await useKpiTasksByPriority();
+                const result = await fetchKpiTasksByPriority();
                 setChartData(result || []);
-                setTotal(result.reduce((sum, item) => sum + (item.count || 0), 0));
+                setTotal((result || []).reduce((sum, item) => sum + (item.count || 0), 0));
             } catch (err) {
                 setError('Error al cargar los datos del gráfico');
                 console.error(err);

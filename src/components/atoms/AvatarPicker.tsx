@@ -1,5 +1,6 @@
 'use client'
 import { useRef, useState } from 'react';
+import Image from 'next/image';
 
 type AvatarPickerProps = {
   imageUrl?: string;
@@ -43,9 +44,11 @@ export const AvatarPicker = ({
         onClick={handleClick}
       >
         {imageUrl && !imgError ? (
-          <img
+          <Image
             src={imageUrl}
             alt={alt}
+            width={96}
+            height={96}
             className="w-full h-full object-cover"
             onError={() => setImgError(true)}
             onLoad={() => imgError && setImgError(false)}

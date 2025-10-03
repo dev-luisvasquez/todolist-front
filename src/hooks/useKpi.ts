@@ -3,7 +3,8 @@ import { KpiControllerGetCompletedForDaysParams } from "@/api/generated";
 
 const kpiAPI = getKpi();
 
-export const useKpiTasksByPriority = async () => {
+// Funciones normales (no hooks) para obtener KPIs. Se renombraron para evitar que ESLint las trate como React Hooks.
+export const fetchKpiTasksByPriority = async () => {
     try {
         const response = await kpiAPI.kpiControllerGetTasksByPriority();
         return response;
@@ -13,7 +14,7 @@ export const useKpiTasksByPriority = async () => {
     }
 }
 
-export const useKpiAvgTasksCompletedTime = async () => {
+export const fetchKpiAvgTasksCompletedTime = async () => {
     try {
         const response = await kpiAPI.kpiControllerGetAvgCompletionTime();
         return response;
@@ -23,7 +24,7 @@ export const useKpiAvgTasksCompletedTime = async () => {
     }
 }
 
-export const useKpiDistributionTasks = async () => {
+export const fetchKpiDistributionTasks = async () => {
     try {
         const response = await kpiAPI.kpiControllerGetTaskDistribution();
         return response;
@@ -33,7 +34,7 @@ export const useKpiDistributionTasks = async () => {
     }
 }
 
-export const useKpiCompletedTasksForDays = async (days?: number) => {
+export const fetchKpiCompletedTasksForDays = async (days?: number) => {
     try {
         const params: KpiControllerGetCompletedForDaysParams = days ? { days } : {};
         const response = await kpiAPI.kpiControllerGetCompletedForDays(params);

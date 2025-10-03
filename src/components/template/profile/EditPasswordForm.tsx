@@ -25,7 +25,7 @@ export const EditPasswordForm = () => {
         confirmNewPassword: ""
     });
 
-    const { mutate: changePassword, isLoading, error } = useChangePassword();
+    const { mutate: changePassword, isLoading, error: _error } = useChangePassword();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

@@ -8,7 +8,6 @@ import { DroppableColumn } from "../molecules/DroppableColumn";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import CreateTaskModal from "../molecules/CreateTaskModal";
 import UpdateTaskModal from "../molecules/UpdateTaskModal";
-import AuthStorage from "@/utils/auth";
 import { useGlobalUser } from "@/hooks/useGlobalUser";
 
 export const TasksLists = () => {
@@ -20,7 +19,7 @@ export const TasksLists = () => {
     const { user, isAuthenticated } = useGlobalUser();
 
     // Usar el hook que ahora usa Axios directamente
-    const { data: serverTasks, isLoading, error, refetch } = useTasks();
+    const { data: serverTasks, isLoading, error } = useTasks();
     const { mutate: updateTaskState } = useUpdateTaskState();
     const { mutate: createTask, isLoading: isCreatingTask } = useCreateTask();
     const { mutate: deleteTask } = useDeleteTask();
@@ -115,7 +114,9 @@ export const TasksLists = () => {
             const updatedTask = { ...editingTask, ...taskData };
             updateTask(updatedTask);
             setEditingTask(null); // Cerrar el modal después de actualizar
-            serverTasks && setOptimisticTasks(prevTasks => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+            if (serverTasks) {
+                setOptimisticTasks(prevTasks => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+            }
         } catch (error) {
             console.error('Error al actualizar la tarea:', error);
             alert('Error al actualizar la tarea');
@@ -127,7 +128,7 @@ export const TasksLists = () => {
             // Actualización optimista: remover la tarea inmediatamente
             setOptimisticTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
             await deleteTask(taskId);
-        } catch (error) {
+        } catch {
             // Revertir en caso de error
             setOptimisticTasks(optimisticTasks);
             alert('Error al eliminar la tarea.');
@@ -136,7 +137,6 @@ export const TasksLists = () => {
 
     const handleCreateTask = async (taskData: Omit<CreateTaskDto, 'userId'>) => {
         try {
-            console.log(isAuthenticated);
             if (isAuthenticated === false) {
                 alert('Error: Usuario no autenticado');
                 return;
@@ -170,12 +170,11 @@ export const TasksLists = () => {
 
     if (isLoading) {
         return (
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="min-h-[500px] p-4 rounded-lg border-2 border-gray-300 bg-gray-50 animate-pulse">
                     <div className="h-6 bg-gray-200 rounded mb-4 w-1/2"></div>
                     <div className="space-y-3">
-                        {[...Array(3)].map((_, i) => (
+                        {[...Array(3)].map((__, i) => (
                             <div key={i} className="h-24 bg-gray-200 rounded"></div>
                         ))}
                     </div>
@@ -183,7 +182,7 @@ export const TasksLists = () => {
                 <div className="min-h-[500px] p-4 rounded-lg border-2 border-gray-300 bg-gray-50 animate-pulse">
                     <div className="h-6 bg-gray-200 rounded mb-4 w-1/2"></div>
                     <div className="space-y-3">
-                        {[...Array(2)].map((_, i) => (
+                        {[...Array(2)].map((__, i) => (
                             <div key={i} className="h-24 bg-gray-200 rounded"></div>
                         ))}
                     </div>
@@ -191,7 +190,7 @@ export const TasksLists = () => {
                 <div className="min-h-[500px] p-4 rounded-lg border-2 border-gray-300 bg-gray-50 animate-pulse">
                     <div className="h-6 bg-gray-200 rounded mb-4 w-1/2"></div>
                     <div className="space-y-3">
-                        {[...Array(1)].map((_, i) => (
+                        {[...Array(1)].map((__, i) => (
                             <div key={i} className="h-24 bg-gray-200 rounded"></div>
                         ))}
                     </div>

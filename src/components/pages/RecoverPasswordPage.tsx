@@ -1,11 +1,7 @@
 import RecoverPassword from "../template/RecoverPassword";
 
-interface RecoverPasswordPageProps {
-    token?: string | null;
-}
-
-export const RecoverPasswordPage = ({ token }: RecoverPasswordPageProps) => {
+export const RecoverPasswordPage = () => {
     return (
-        <RecoverPassword token={token} />
+        <RecoverPassword />
     );
 }

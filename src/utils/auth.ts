@@ -1,6 +1,3 @@
-// Utilidades para manejar el estado de autenticación
-import { UserResponseDto } from "@/api/generated";
- 
 
 export const AuthStorage = {
   // Getters

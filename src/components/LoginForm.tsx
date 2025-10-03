@@ -21,8 +21,8 @@ export default function LoginForm() {
       if (typeof window !== 'undefined') {
         window.location.href = '/home';
       }
-    } catch (error) {
-      // El error ya se maneja en el hook
+    } catch {
+      return;
     }
   };
 

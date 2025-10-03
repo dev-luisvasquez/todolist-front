@@ -1,22 +1,19 @@
-
 'use client';
 
 import { useState } from 'react';
 import { useRecoverPassword } from '@/hooks/useAuth';
 import type { AuthControllerRecoverPasswordBody } from '@/api/generated/models';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation'; // 👈 CORRECTO en App Router
 
-interface RecoverPasswordProps {
-    token?: string | null;
-}
+export default function RecoverPassword() {
+    const searchParams = useSearchParams();
+    const token = searchParams.get("token"); // 👈 aquí lees el query param ?token=1234
 
-export default function RecoverPassword({ token }: RecoverPasswordProps) {
     const [formData, setFormData] = useState<AuthControllerRecoverPasswordBody>({
         newPassword: '',   
     });
-
     const [confirmPassword, setConfirmPassword] = useState<string>('');
-
     const recoverPasswordMutation = useRecoverPassword();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -33,19 +30,19 @@ export default function RecoverPassword({ token }: RecoverPasswordProps) {
         }
 
         try {
-            await recoverPasswordMutation.mutate(formData.newPassword, token);
+            await recoverPasswordMutation.mutate(formData.newPassword, token as string);
             alert('Contraseña cambiada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.');
-        } catch (error) {
+        } catch {
             // El error ya se maneja en el hook
         }
-    }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
         });
-    }
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -60,14 +57,13 @@ export default function RecoverPassword({ token }: RecoverPasswordProps) {
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div>
-                        <label htmlFor="newPassword" >
+                        <label htmlFor="newPassword">
                             Nueva Contraseña
                         </label>
                         <input
                             id="newPassword"
                             name="newPassword"
                             type="password"
-
                             required
                             className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                             placeholder="Nueva contraseña"
@@ -77,7 +73,7 @@ export default function RecoverPassword({ token }: RecoverPasswordProps) {
                     </div>
 
                     <div>
-                        <label htmlFor="confirmPassword" >
+                        <label htmlFor="confirmPassword">
                             Repite Contraseña
                         </label>
                         <input

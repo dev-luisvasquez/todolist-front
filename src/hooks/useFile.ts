@@ -218,7 +218,8 @@ export const useFileManager = () => {
     optimized.reset();
     transformed.reset();
     deleteFile.reset();
-  }, [upload.reset, uploadUrl.reset, optimized.reset, transformed.reset, deleteFile.reset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     upload: upload.uploadFile,

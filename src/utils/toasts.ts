@@ -16,14 +16,18 @@ export const InfoToast = (message: string) => {
 
 
 
-export const PromiseToast = (promise: Promise<any>, messages: { loading: string; success: string; error: string; }) => {
+export const PromiseToast = <T,>(
+    promise: Promise<T>,
+    messages: { loading: string; success: string; error: string; }
+): Promise<T> => {
     return toast.promise(
         promise,
         {
             loading: messages.loading,
-            success: messages.success,
-            error: messages.error,
+            // puedes usar el valor resuelto si quieres: (value: T) => `Hecho: ${value}`
+            success: (_value: T) => messages.success,
+            error: (_err: unknown) => messages.error,
         },
-        {position: "top-right"}
-    )
+        { position: "top-right" }
+    ) as Promise<T>;
 }

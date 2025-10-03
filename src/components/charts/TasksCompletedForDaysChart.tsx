@@ -1,8 +1,8 @@
 'use client';
 
-import { KpiControllerGetCompletedForDays200, KpiControllerGetCompletedForDays200TasksByDayItem } from "@/api/generated";
+import { KpiControllerGetCompletedForDays200TasksByDayItem } from "@/api/generated";
 import { Bar } from "react-chartjs-2";
-import { useKpiCompletedTasksForDays } from "@/hooks/useKpi";
+import { fetchKpiCompletedTasksForDays } from "@/hooks/useKpi";
 import { FormatDate } from "@/utils/translate";
 import { useEffect, useState } from "react";
 import {
@@ -38,7 +38,7 @@ export const TasksCompletedForDaysChart = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await useKpiCompletedTasksForDays(days);
+                const response = await fetchKpiCompletedTasksForDays(days);
                 setData(response.tasksByDay || []);
             } catch (error) {
                 console.error("Error fetching data:", error);

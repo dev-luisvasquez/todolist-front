@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import AuthStorage from '@/utils/auth';
+import { AxiosError } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -54,7 +55,7 @@ axiosInstance.interceptors.response.use(
             
             // Si el refresh token ya expiró, limpiar storage
             if (payload.exp && payload.exp < currentTime) {
-              console.log('Refresh token expirado, limpiando storage...');
+
               AuthStorage.clear();
               
               if (typeof window !== 'undefined') {
@@ -116,9 +117,9 @@ axiosInstance.interceptors.response.use(
           typeof refreshError === 'object' &&
           refreshError !== null &&
           'response' in refreshError &&
-          (refreshError as any).response?.status === 401
+          (refreshError as AxiosError).response?.status === 401
         ) {
-          console.log('Refresh token rechazado por el servidor (401), limpiando storage...');
+         
           AuthStorage.clear();
           
           if (typeof window !== 'undefined') {
@@ -144,18 +145,19 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export const customInstance = <T = any>(
+type CancelablePromise<T> = Promise<T> & { cancel: () => void };
+
+export const customInstance = <T = unknown>(
   config: AxiosRequestConfig,
   options?: AxiosRequestConfig,
-): Promise<T> => {
+): CancelablePromise<T> => {
   const source = axios.CancelToken.source();
   const promise = axiosInstance({
     ...config,
     ...options,
     cancelToken: source.token,
-  }).then(({ data }: AxiosResponse) => data);
+  }).then(({ data }: AxiosResponse) => data) as CancelablePromise<T>;
 
-  // @ts-ignore
   promise.cancel = () => {
     source.cancel('Query was cancelled');
   };

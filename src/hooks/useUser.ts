@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getUsers } from '@/api/generated/users/users';
 import AuthStorage from '@/utils/auth';
 import { useUserStore } from '@/stores/userStore';
@@ -19,8 +19,8 @@ export const useLocalStorageUser = () => {
       const storedUser = AuthStorage.getUser();
       setUser(storedUser);
     } catch (error) {
-      console.error('Error al obtener usuario del localStorage:', error);
       setUser(null);
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -33,7 +33,7 @@ export const useLocalStorageUser = () => {
       // El localStorage debe ser manejado solo por Zustand store
       setUser(newUser);
     } catch (error) {
-      console.error('Error al actualizar usuario en localStorage:', error);
+      throw error;
     }
   };
 
@@ -85,9 +85,9 @@ export const useUser = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { user: storeUser, refreshUserData, setUser, updateUser: updateUserStore } = useUserStore();
+  const { user: storeUser, refreshUserData, setUser } = useUserStore();
 
-  const getUserInfo = async () => {
+  const getUserInfo = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -106,7 +106,7 @@ export const useUser = () => {
       setUserState(response);
 
       // sincronizar store (si cambió algo como avatar o birthday)
-      if (!storeUser || storeUser.avatar !== response.avatar || (storeUser as any).birthday !== (response as any).birthday || storeUser.name !== response.name || storeUser.last_name !== response.last_name || storeUser.email !== response.email) {
+      if (!storeUser || storeUser.avatar !== response.avatar || (storeUser as UserResponseDto).birthday !== (response as UserResponseDto).birthday || storeUser.name !== response.name || storeUser.last_name !== response.last_name || storeUser.email !== response.email) {
         // usar setUser para reemplazo completo seguro
         setUser(response as UserResponseDto);
       }
@@ -117,12 +117,11 @@ export const useUser = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [storeUser, refreshUserData, setUser]);
 
   useEffect(() => {
     getUserInfo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeUser?.id]);
+  }, [getUserInfo]);
 
   return {
     data: user,

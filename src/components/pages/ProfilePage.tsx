@@ -8,7 +8,7 @@ export const ProfilePage = () => {
      const [activeTab, setActiveTab] = useState<"informacion" | "contraseña">("informacion");
     return (
         <div >
-            <h1 className="text-3xl font-semibold">Perfil de Usuario</h1>
+            
             <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
                 <div className="col-span-1 md:col-span-1 lg:col-span-1 bg-white p-4 rounded-lg shadow h-fit">
                     <nav className="space-y-2">

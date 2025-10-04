@@ -5,6 +5,7 @@ import { useRecoverPassword } from '@/hooks/useAuth';
 import type { AuthControllerRecoverPasswordBody } from '@/api/generated/models';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation'; // 👈 CORRECTO en App Router
+import { ErrorToast, SuccessToast } from '@/utils/toasts';
 
 export default function RecoverPassword() {
     const searchParams = useSearchParams();
@@ -20,18 +21,18 @@ export default function RecoverPassword() {
         e.preventDefault();
 
         if (formData.newPassword !== confirmPassword) {
-            alert('Las contraseñas no coinciden');
+            ErrorToast('Las contraseñas no coinciden');
             return;
         }
 
         if (!token) {
-            alert('Token de recuperación no válido');
+            ErrorToast('Token de recuperación no válido, intenta de nuevo');
             return;
         }
 
         try {
             await recoverPasswordMutation.mutate(formData.newPassword, token as string);
-            alert('Contraseña cambiada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.');
+            SuccessToast('Contraseña cambiada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.');
         } catch {
             // El error ya se maneja en el hook
         }

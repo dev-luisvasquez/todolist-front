@@ -18,9 +18,6 @@ export const CardTask = ({ id, title, description, priority, state, created_at, 
         e.stopPropagation();
         if (onEdit) {
             onEdit({ id, title, description, priority, state, created_at, updated_at, userId });
-        } else {
-            // Fallback para pruebas
-            alert(`Editar tarea: ${title}`);
         }
     };
 
@@ -28,9 +25,6 @@ export const CardTask = ({ id, title, description, priority, state, created_at, 
         e.stopPropagation();
         if (onDelete) {
             onDelete(id);
-        } else {
-            // Fallback para pruebas
-            alert(`Eliminar tarea: ${title}`);
         }
     };
 

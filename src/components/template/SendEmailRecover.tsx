@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSendRecoverEmail } from '@/hooks/useAuth';
 import type { AuthControllerRequestPasswordRecoveryBody } from '@/api/generated/models';
 import Link from 'next/link';
+import { ErrorToast, SuccessToast } from '@/utils/toasts';
 
 export default function SendEmailRecover() {
     const [formData, setFormData] = useState<AuthControllerRequestPasswordRecoveryBody>({
@@ -18,9 +19,9 @@ export default function SendEmailRecover() {
         try {
             await sendRecoverEmailMutation.mutate(formData.email); // Pasar solo el email como string
             // Redirigir después del registro exitoso
-            alert('Correo de recuperación enviado. Revisa tu bandeja de entrada.');
+            SuccessToast('Correo de recuperación enviado. Revisa tu bandeja de entrada.');
         } catch {
-            // El error ya se maneja en el hook
+            ErrorToast('Error al enviar correo. Intentalo mas tarde.');
         }
     }
 

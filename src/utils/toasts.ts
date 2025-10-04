@@ -14,8 +14,6 @@ export const InfoToast = (message: string) => {
     return toast(message, {position: "top-right"} );
 }
 
-
-
 export const PromiseToast = <T,>(
     promise: Promise<T>,
     messages: { loading: string; success: string; error: string; }

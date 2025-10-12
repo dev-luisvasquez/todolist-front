@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
+
 export default function Home() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
@@ -13,7 +14,7 @@ export default function Home() {
       if (isAuthenticated) {
         router.push('/home');
       } else {
-        router.push('/auth/signin');
+        router.push('/auth');
       }
     }
   }, [isAuthenticated, isLoading, router]);

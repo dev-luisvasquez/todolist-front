@@ -1,4 +1,4 @@
-import RecoverPassword from "../template/RecoverPassword";
+import RecoverPassword from "../auth/RecoverPasswordForm";
 
 export const RecoverPasswordPage = () => {
     return (

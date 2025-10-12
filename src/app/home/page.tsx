@@ -19,7 +19,7 @@ const Home = () => {
         return <div>No hay usuario autenticado.</div>;
     }
     return (
-        <div>
+        <div className="">
             <h1 className="text-3xl font-semibold mb-3">Bienvenido de vuelta <strong>{user.name} {user.last_name}</strong> 😊</h1>
             <section className="mb-8 p-4 bg-white rounded-lg shadow">
                 <h1 className="text-xl font-semibold">Tareas por prioridad</h1>

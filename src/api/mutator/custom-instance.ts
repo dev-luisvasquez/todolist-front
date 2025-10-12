@@ -6,7 +6,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -59,7 +59,10 @@ axiosInstance.interceptors.response.use(
               AuthStorage.clear();
               
               if (typeof window !== 'undefined') {
-                window.location.href = '/auth/signin';
+                // En vez de forzar una recarga/navegación aquí, emitimos un evento para que
+                // un componente cliente (montado en layout o provider) haga la navegación
+                // usando el router de Next (evita recargas infinitas y el error de router en módulo).
+                window.dispatchEvent(new CustomEvent('app:logout'));
               }
               return Promise.reject(new Error('Refresh token expirado'));
             }
@@ -69,7 +72,7 @@ axiosInstance.interceptors.response.use(
             AuthStorage.clear();
             
             if (typeof window !== 'undefined') {
-              window.location.href = '/auth/signin';
+              window.dispatchEvent(new CustomEvent('app:logout'));
             }
             return Promise.reject(new Error('Refresh token inválido'));
           }
@@ -101,11 +104,11 @@ axiosInstance.interceptors.response.use(
           // Reintentar la petición original
           return axiosInstance(originalRequest);
         } else {
-          // Si no hay refresh token, limpiar storage y redirigir
+          // Si no hay refresh token, limpiar storage y notificar para navegación cliente
           AuthStorage.clear();
           
           if (typeof window !== 'undefined') {
-            window.location.href = '/auth/signin';
+            window.dispatchEvent(new CustomEvent('app:logout'));
           }
           return Promise.reject(new Error('No hay refresh token disponible'));
         }
@@ -123,7 +126,7 @@ axiosInstance.interceptors.response.use(
           AuthStorage.clear();
           
           if (typeof window !== 'undefined') {
-            window.location.href = '/auth/signin';
+            window.dispatchEvent(new CustomEvent('app:logout'));
           }
           
           return Promise.reject(new Error('Refresh token no válido'));
@@ -133,7 +136,7 @@ axiosInstance.interceptors.response.use(
         AuthStorage.clear();
         
         if (typeof window !== 'undefined') {
-          window.location.href = '/auth/signin';
+          window.dispatchEvent(new CustomEvent('app:logout'));
         }
         
         return Promise.reject(refreshError);

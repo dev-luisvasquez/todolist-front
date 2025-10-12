@@ -5,7 +5,9 @@ import QueryProvider from "@/components/QueryProvider";
 import ConditionalHeader from "@/components/ConditionalHeader";
 import RouteGuard from "@/components/RouteGuard";
 import { UserStoreProvider } from "@/components/UserStoreProvider";
-import {Toaster} from "react-hot-toast"
+
+// Toastify
+import { ToastContainer } from "react-toastify";
 
 
 const poppins = Poppins({
@@ -33,8 +35,8 @@ export default function RootLayout({
           <UserStoreProvider>
             <RouteGuard>
               <ConditionalHeader />
-              <Toaster />
-              <main className="container mx-auto p-4">{children}</main>
+              <ToastContainer />
+              <main className="container mx-auto p-4 ">{children}</main>
             </RouteGuard>
           </UserStoreProvider>
         </QueryProvider>

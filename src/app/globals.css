@@ -1,8 +1,38 @@
 @import "tailwindcss";
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
 
 :root {
   --background: #ffffff;
   --foreground: #000000;
+
+  --primary: #6C5CE7;
+  --primary-600: #5643C8;
+  --primary-300: #DDE0FF;
+  --accent: #A29BFE;
+  --success: #7BD389;
+  --warning: #FFD08A;
+  --danger: #FF9AA2;
+  --neutral-bg: #FAFAFF;
+  --text-on-primary: #ffffff;
+
+  /* Secondary pastel options */
+  /* Verde pastel */
+  --secondary-green: #7BD389;
+  --secondary-green-600: #56C06A;
+  --secondary-green-300: #E6F9EA;
+
+  /* Celeste pastel */
+  --secondary-cyan: #6FD1E8;
+  --secondary-cyan-600: #3FB8DA;
+  --secondary-cyan-300: #E6F8FB;
+
+  /* Naranja pastel */
+  --secondary-orange: #FFC77D;
+  --secondary-orange-600: #FFB24A;
+  --secondary-orange-300: #FFF3E6;
+  
 }
 
 @theme inline {

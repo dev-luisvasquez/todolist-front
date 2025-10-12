@@ -5,8 +5,9 @@ import { InputPasswordForm } from "@/components/atoms/InputForm";
 // Hooks
 import { useState } from "react";
 
-// Utils
-import { ErrorToast, PromiseToast } from "@/utils/toasts";
+// Toast
+import { showToast, showPromiseToast } from "@/utils/Alerts/toastAlerts";
+
 
 // API 
 import { useChangePassword } from "@/hooks/useAuth";
@@ -47,10 +48,10 @@ export const EditPasswordForm = () => {
             await passwordSchema.validate(dataToValidate, { abortEarly: false });
 
             // Si pasa la validación, procede con el cambio
-            await PromiseToast(
+            await showPromiseToast(
                 changePassword(passwords.oldPassword, passwords.newPassword),
                 {
-                    loading: "Actualizando contraseña...",
+                    pending: "Actualizando contraseña...",
                     success: "Contraseña actualizada",
                     error: "Error al actualizar la contraseña, intente de nuevo",
                 }
@@ -64,7 +65,7 @@ export const EditPasswordForm = () => {
         } catch (err) {
             if (err instanceof ValidationError) {
                 // Muestra todos los mensajes de error de Yup
-                ErrorToast(err.errors.join("\n"));
+                showToast(err.errors.join("\n"), { type: "error" });
                 return;
             }
             return;

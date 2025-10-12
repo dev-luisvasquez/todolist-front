@@ -6,6 +6,8 @@ type BaseProps = {
   label?: string;
   name?: string;
   disabled?: boolean;
+  autocomplete?: string;
+  required?: boolean;
 };
 
 type ControlledProps = {
@@ -22,8 +24,10 @@ type UncontrolledProps = {
 
 type FormDataProps = BaseProps & (ControlledProps | UncontrolledProps);
 
+const stylesButton = "w-full px-4 py-3 border bg-[#F3EFF7] border-gray-300 rounded-4xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:text-gray-600"
+
 export const InputForm = (props: FormDataProps) => {
-  const { placeholder, type = 'text', label, name, disabled } = props;
+  const { placeholder, type = 'text', label, name, disabled, autocomplete, required } = props;
 
   const inputProps =
     'value' in props
@@ -40,10 +44,12 @@ export const InputForm = (props: FormDataProps) => {
       <input
         type={type}
         id={name}
+        autoComplete={autocomplete}
         name={name}
+        required={required}
         disabled={disabled}
         {...inputProps}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:text-gray-600"
+        className={stylesButton}
         placeholder={placeholder}
       />
     </div>
@@ -73,7 +79,7 @@ export const InputPasswordForm = (props: FormDataProps) => {
           name={name}
           disabled={disabled}
           {...inputProps}
-          className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:text-gray-600"
+          className={stylesButton}
           placeholder={placeholder}
         />
         <button

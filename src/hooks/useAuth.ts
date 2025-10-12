@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
+import { AxiosError } from 'axios';
 import { getAuth } from '@/api/generated/auth/auth';
-import { AuthDto, CreateUserDto,UserResponseDto } from '@/api/generated';
+import { AuthDto, CreateUserDto,UserResponseDto, LoginResponseDto } from '@/api/generated';
 import AuthStorage from '@/utils/auth';
 import { useUserActions } from '@/hooks/useGlobalUser';
 import { useRouter } from 'next/navigation'
+
+
+// Toast
+import { showToast } from '@/utils/Alerts/toastAlerts';
 
 // Crear instancia de las funciones de auth
 const authAPI = getAuth();
@@ -37,13 +42,11 @@ export const useLogin = () => {
         } as UserResponseDto;
         setUser(userForStorage);
       }
-
       return response;
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión';
       setError(errorMessage);
-      console.error('Error logging in:', err);
-      throw err;
+      showToast('Error al iniciar sesión. Verifica tus credenciales.', { type: "error" });
     } finally {
       setIsLoading(false);
     }
@@ -67,20 +70,45 @@ export const useRegister = () => {
       setIsLoading(true);
       setError(null);
 
+      const formattedBirthday = userData.birthday ? new Date(userData.birthday).toISOString() : undefined;
+      userData.birthday = formattedBirthday;
+
       const response = await authAPI.authControllerSignUp(userData);
 
-      // Guardar tokens y usuario después del registro
-      if (response.access_Token) {
-        AuthStorage.setAccessToken(response.access_Token);
+      // Si el signup no devuelve tokens, intentar hacer signin automático
+      let finalResponse = response as LoginResponseDto;
+
+      if (!response.access_Token) {
+        try {
+          // Asegurar que email y password existan
+          if (userData.email && userData.password) {
+            const signInPayload: AuthDto = {
+              email: userData.email,
+              password: userData.password,
+            } as AuthDto;
+
+            const signInResponse = await authAPI.authControllerSignIn(signInPayload);
+            // Usar la respuesta del signin si devuelve tokens/usuario
+            finalResponse = signInResponse || finalResponse;
+          }
+        } catch (signinErr) {
+          // No detener el flujo si el signin falla; dejar la respuesta del signup
+          console.warn('Signin automático después del registro falló:', signinErr);
+        }
       }
-      if (response.refresh_Token) {
-        AuthStorage.setRefreshToken(response.refresh_Token);
+
+      // Guardar tokens y usuario (usando la respuesta final que puede venir del signup o del signin)
+      if (finalResponse.access_Token) {
+        AuthStorage.setAccessToken(finalResponse.access_Token);
       }
-      if (response.user) {
+      if (finalResponse.refresh_Token) {
+        AuthStorage.setRefreshToken(finalResponse.refresh_Token);
+      }
+      if (finalResponse.user) {
         const userForStorage = {
-          ...response.user,
-          created_at: (response as unknown as UserResponseDto).created_at,
-          updated_at: (response as unknown as UserResponseDto).updated_at
+          ...finalResponse.user,
+          created_at: (finalResponse as unknown as UserResponseDto).created_at,
+          updated_at: (finalResponse as unknown as UserResponseDto).updated_at
         } as UserResponseDto;
         setUser(userForStorage);
       }
@@ -89,7 +117,9 @@ export const useRegister = () => {
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Error al registrar usuario';
       setError(errorMessage);
-      console.error('Error registering:', err);
+      if((err as unknown as { status: number }).status === 409) {
+        showToast('El email ya está en uso. Intenta con otro.', { type: "error" });
+      }
       throw err;
     } finally {
       setIsLoading(false);
@@ -113,7 +143,7 @@ export const useLogout = () => {
     clearUser();
 
     // Navegar sin recargar la página
-    router.replace('/auth/signin');
+    router.replace('/auth');
   };
 };
 
@@ -161,6 +191,13 @@ export const useSendRecoverEmail = () => {
       const errorMessage = err instanceof Error ? err.message : 'Error al enviar email de recuperación';
       setError(errorMessage);
       console.error('Error sending recovery email:', err);
+      if(err instanceof AxiosError) {
+        if(err.response?.status === 404) {
+          showToast('Email no encontrado', { type: "error" });
+        } else {
+          showToast('Error al enviar email de recuperación', { type: "error" });
+        }
+      }
       throw err;
     } finally {
       setIsLoading(false);

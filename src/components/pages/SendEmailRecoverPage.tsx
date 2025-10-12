@@ -1,4 +1,4 @@
-import SendEmailRecover from "../template/SendEmailRecover";
+import SendEmailRecover from "../auth/SendEmailRecover";
 
 export const SendEmailRecoverPage = () => {
     return (

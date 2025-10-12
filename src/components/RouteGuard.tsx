@@ -14,7 +14,7 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
 
   const { isAuthenticated, isLoading } = useUserState();
 
-  const publicRoutes = ['/auth/signin', '/auth/signup', '/auth/send-email-recover', '/auth/reset-password'];
+  const publicRoutes = [ '/auth', '/auth/reset-password'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
 
@@ -29,7 +29,7 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
       }
     } else {
       if (!isAuthenticated) {
-        router.replace('/auth/signin');
+        router.replace('/auth');
       }
 
 

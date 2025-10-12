@@ -3,7 +3,9 @@ import { useUser, useUpdateUser } from "@/hooks/useUser";
 import { useGlobalUser } from "@/hooks/useGlobalUser";
 import { useUploadFile } from "@/hooks/useFile";
 import { UpdateUserDto } from "@/api/generated/models/updateUserDto";
-import { PromiseToast, ErrorToast } from "@/utils/toasts";
+
+// Toast
+import { showToast, showPromiseToast } from "@/utils/Alerts/toastAlerts";
 import { generateInitials } from "@/utils/initials";
 
 // Componentes
@@ -73,7 +75,7 @@ export const EditProfileForm = () => {
     if (!isEditing) return;
 
     if (!userData?.id) {
-      ErrorToast("No se encontró el usuario");
+      showToast("No se encontró el usuario", { type: "error" });
       return;
     }
 
@@ -85,8 +87,8 @@ export const EditProfileForm = () => {
 
     const uploadPromise = uploadFile(uploadData);
 
-    PromiseToast(uploadPromise, {
-      loading: "Subiendo avatar...",
+    showPromiseToast(uploadPromise, {
+      pending: "Subiendo avatar...",
       success: "Avatar cargado. Recuerda guardar los cambios",
       error: "Error al subir el avatar",
     });
@@ -107,7 +109,7 @@ export const EditProfileForm = () => {
 
     setIsSaving(true);
     if (!userData?.id) {
-      ErrorToast("No se encontró el usuario");
+      showToast("No se encontró el usuario", { type: "error" });
       setIsSaving(false);
       return;
     }
@@ -145,8 +147,8 @@ export const EditProfileForm = () => {
       }
     })();
 
-    PromiseToast(updatePromise, {
-      loading: "Actualizando información...",
+    showPromiseToast(updatePromise, {
+      pending: "Actualizando información...",
       success: "Información actualizada correctamente",
       error: "Error al actualizar la información",
     });

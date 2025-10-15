@@ -5,9 +5,8 @@ import { useRegister } from '@/hooks/useAuth';
 import type { CreateUserDto } from '@/api/generated/models';
 
 // Componentes
-import { InputForm, InputPasswordForm } from '../atoms/InputForm';
+import { InputForm, InputPasswordForm } from '../atoms/inputs/InputForm';
 import { ButtonAction } from '../atoms/buttons/ButtonAction';
-
 
 type View = 'signin' | 'signup' | 'forgot';
 
@@ -35,7 +34,7 @@ export default function SignupForm({ onSwitch }: { onSwitch?: (v: View) => void 
                 window.location.href = '/auth';
             }
         } catch {
-           return;
+            return;
         }
     };
 

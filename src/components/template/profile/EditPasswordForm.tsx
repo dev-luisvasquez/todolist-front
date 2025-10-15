@@ -1,29 +1,25 @@
 // Componentes
-import { ButtonAction } from "@/components/atoms/buttons/ButtonAction";
-import { InputPasswordForm } from "@/components/atoms/InputForm";
+import { ButtonAction } from '@/components/atoms/buttons/ButtonAction';
+import { InputPasswordForm } from '@/components/atoms/inputs/InputForm';
 
 // Hooks
-import { useState } from "react";
+import { useState } from 'react';
 
 // Toast
-import { showToast, showPromiseToast } from "@/utils/Alerts/toastAlerts";
+import { showToast, showPromiseToast } from '@/utils/Alerts/toastAlerts';
 
-
-// API 
-import { useChangePassword } from "@/hooks/useAuth";
+// API
+import { useChangePassword } from '@/hooks/useAuth';
 
 // Validaciones
-import { passwordSchema } from "@/validation/validationForm";
-import { ValidationError } from "yup";
-
-
-
+import { passwordSchema } from '@/validation/validationForm';
+import { ValidationError } from 'yup';
 
 export const EditPasswordForm = () => {
     const [passwords, setNewPassword] = useState({
-        oldPassword: "",
-        newPassword: "",
-        confirmNewPassword: ""
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
     });
 
     const { mutate: changePassword, isLoading, error: _error } = useChangePassword();
@@ -48,31 +44,28 @@ export const EditPasswordForm = () => {
             await passwordSchema.validate(dataToValidate, { abortEarly: false });
 
             // Si pasa la validación, procede con el cambio
-            await showPromiseToast(
-                changePassword(passwords.oldPassword, passwords.newPassword),
-                {
-                    pending: "Actualizando contraseña...",
-                    success: "Contraseña actualizada",
-                    error: "Error al actualizar la contraseña, intente de nuevo",
-                }
-            );
+            await showPromiseToast(changePassword(passwords.oldPassword, passwords.newPassword), {
+                pending: 'Actualizando contraseña...',
+                success: 'Contraseña actualizada',
+                error: 'Error al actualizar la contraseña, intente de nuevo',
+            });
 
             setNewPassword({
-                oldPassword: "",
-                newPassword: "",
-                confirmNewPassword: ""
+                oldPassword: '',
+                newPassword: '',
+                confirmNewPassword: '',
             });
         } catch (err) {
             if (err instanceof ValidationError) {
                 // Muestra todos los mensajes de error de Yup
-                showToast(err.errors.join("\n"), { type: "error" });
+                showToast(err.errors.join('\n'), { type: 'error' });
                 return;
             }
             return;
         }
-    }
+    };
 
-    const isTyping = Object.values(passwords).some((v) => v.trim() !== "");
+    const isTyping = Object.values(passwords).some((v) => v.trim() !== '');
 
     return (
         <div>
@@ -97,23 +90,25 @@ export const EditPasswordForm = () => {
                     onChange={handleInputChange}
                 />
                 <div className="flex justify-end">
-                    {isLoading ? (
-                        <ButtonAction
-                            typeButton="submit"
-                            text="Actualizando Contraseña..."
-                            typeAction="save"
-                            disabled={true}
-                        />
-                    ) : (
-                        <ButtonAction
-                            typeButton="submit"
-                            text="Actualizar Contraseña"
-                            typeAction="save"
-                            disabled={!isTyping}
-                        />
-                    )}
+                    <div>
+                        {isLoading ? (
+                            <ButtonAction
+                                typeButton="submit"
+                                text="Actualizando Contraseña..."
+                                typeAction="save"
+                                disabled={true}
+                            />
+                        ) : (
+                            <ButtonAction
+                                typeButton="submit"
+                                text="Actualizar Contraseña"
+                                typeAction="save"
+                                disabled={!isTyping}
+                            />
+                        )}
+                    </div>
                 </div>
-            </form >
-        </div >
+            </form>
+        </div>
     );
 };

@@ -1,11 +1,14 @@
 'use client';
 
+// Hooks
 import { useState } from 'react';
 import { useLogin } from '@/hooks/useAuth';
+
+// Types
 import type { AuthDto } from '@/api/generated/models';
 
 // Components
-import { InputForm, InputPasswordForm } from '../atoms/InputForm';
+import { InputForm, InputPasswordForm } from '../atoms/inputs/InputForm';
 import { ButtonAction } from '../atoms/buttons/ButtonAction';
 
 
@@ -17,14 +20,14 @@ export default function LoginForm({ onSwitch }: { onSwitch?: (v: View) => void }
         password: '',
     });
 
-
+    
 
     const loginMutation = useLogin();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await loginMutation.mutate(formData); // Pasar directamente formData, no { data: formData }
+            await loginMutation.mutate(formData); 
         } catch {
            return;
         }
@@ -48,6 +51,7 @@ export default function LoginForm({ onSwitch }: { onSwitch?: (v: View) => void }
                     required
                     value={formData.email}
                     onChange={handleChange}
+                    
                 />
 
                 <InputPasswordForm

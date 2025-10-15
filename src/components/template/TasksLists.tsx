@@ -1,20 +1,20 @@
-'use client'
-import { useState, useMemo, useEffect } from "react";
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { CardTask } from "../molecules/CardTaks";
-import { useTasks, useUpdateTaskState, useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/useTasks";
-import { TaskDto, TaskDtoState, CreateTaskDto, UpdateTaskDto } from "@/api/generated";
-import { DroppableColumn } from "../molecules/DroppableColumn";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import CreateTaskModal from "../molecules/CreateTaskModal";
-import UpdateTaskModal from "../molecules/UpdateTaskModal";
-import { useGlobalUser } from "@/hooks/useGlobalUser";
+'use client';
+import { useState, useMemo, useEffect } from 'react';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCenter } from '@dnd-kit/core';
+import { CardTask } from '../molecules/CardTaks';
+import { useTasks, useUpdateTaskState, useCreateTask, useDeleteTask, useUpdateTask } from '@/hooks/useTasks';
+import { TaskDto, TaskDtoState, CreateTaskDto, UpdateTaskDto, CreateTaskDtoState } from '@/api/generated';
+import { DroppableColumn } from '../molecules/DroppableColumn';
+import CreateTaskModal from '../organism/Task/CreateTaskModal';
+import EditTaskModal from '../organism/Task/EditTaskModal';
+import { useGlobalUser } from '@/hooks/useGlobalUser';
 
 export const TasksLists = () => {
     const [activeTask, setActiveTask] = useState<TaskDto | null>(null);
     const [editingTask, setEditingTask] = useState<TaskDto | null>(null);
     const [optimisticTasks, setOptimisticTasks] = useState<TaskDto[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [initialState, setInitialState] = useState<CreateTaskDtoState>('pending');
 
     const { user, isAuthenticated } = useGlobalUser();
 
@@ -40,15 +40,15 @@ export const TasksLists = () => {
         if (!tasks) return { pending: [], in_progress: [], completed: [] };
 
         return {
-            pending: tasks.filter(task => task.state === TaskDtoState.pending),
-            in_progress: tasks.filter(task => task.state === TaskDtoState.in_progress),
-            completed: tasks.filter(task => task.state === TaskDtoState.completed)
+            pending: tasks.filter((task) => task.state === TaskDtoState.pending),
+            in_progress: tasks.filter((task) => task.state === TaskDtoState.in_progress),
+            completed: tasks.filter((task) => task.state === TaskDtoState.completed),
         };
     }, [tasks]);
 
     const handleDragStart = (event: DragStartEvent) => {
         const { active } = event;
-        const task = tasks?.find(t => t.id === active.id);
+        const task = tasks?.find((t) => t.id === active.id);
         setActiveTask(task || null);
     };
 
@@ -62,7 +62,7 @@ export const TasksLists = () => {
         const newState = over.id as TaskDtoState;
 
         // Encontrar la tarea actual
-        const currentTask = tasks?.find(t => t.id === taskId);
+        const currentTask = tasks?.find((t) => t.id === taskId);
         if (!currentTask) return;
 
         // Si el estado no cambió, no hacer nada
@@ -78,19 +78,15 @@ export const TasksLists = () => {
         const previousTasks = [...optimisticTasks];
 
         // Actualización optimista: actualizar inmediatamente la UI
-        setOptimisticTasks(prevTasks =>
-            prevTasks.map(task =>
-                task.id === taskId
-                    ? { ...task, state: newState }
-                    : task
-            )
+        setOptimisticTasks((prevTasks) =>
+            prevTasks.map((task) => (task.id === taskId ? { ...task, state: newState } : task)),
         );
 
         try {
             // Actualizar el estado de la tarea en el backend
             await updateTaskState({
                 id: taskId,
-                state: newState
+                state: newState,
             });
 
             // Opcional: refrescar desde el servidor para sincronizar
@@ -115,7 +111,7 @@ export const TasksLists = () => {
             updateTask(updatedTask);
             setEditingTask(null); // Cerrar el modal después de actualizar
             if (serverTasks) {
-                setOptimisticTasks(prevTasks => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+                setOptimisticTasks((prevTasks) => prevTasks.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
             }
         } catch (error) {
             console.error('Error al actualizar la tarea:', error);
@@ -126,7 +122,7 @@ export const TasksLists = () => {
     const handleDeleteTask = async (taskId: string) => {
         try {
             // Actualización optimista: remover la tarea inmediatamente
-            setOptimisticTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+            setOptimisticTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
             await deleteTask(taskId);
         } catch {
             // Revertir en caso de error
@@ -144,20 +140,19 @@ export const TasksLists = () => {
 
             const fullTaskData: CreateTaskDto = {
                 ...taskData,
-                userId: user?.id || ''
+                userId: user?.id || '',
             };
 
             // Crear la tarea en el backend
             const newTask = await createTask(fullTaskData);
-            
+
             // Actualizar la UI con la tarea creada del servidor
             if (newTask) {
-                setOptimisticTasks(prevTasks => [...prevTasks, newTask]);
+                setOptimisticTasks((prevTasks) => [...prevTasks, newTask]);
             }
-            
+
             // Cerrar el modal después de crear exitosamente
             setIsCreateModalOpen(false);
-            
         } catch (error) {
             console.error('Error al crear la tarea:', error);
             alert('Error al crear la tarea');
@@ -199,11 +194,12 @@ export const TasksLists = () => {
         );
     }
 
+    const containerClass = `flex md:grid p-12 md:p-4 md:grid-cols-3 gap-4 md:gap-6 overflow-x-scroll md:overflow-visible -mx-4 md:mx-0 px-4 md:px-0 ${activeTask ? 'snap-none' : 'snap-x snap-mandatory'}`;
+
     return (
         <>
-            <h1 className="text-3xl font-semibold">Lista de tareas</h1>
-            <button onClick={() => setIsCreateModalOpen(true)} className="my-4 border p-3 border-gray-300 flex bg-white text-gray-700 hover:bg-gray-100 rounded">Nueva Tarea <PlusIcon className="w-6 font-bold ml-2" /></button>
-            <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+
+            <DndContext collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                 {/* Instrucciones para móviles */}
                 <div className="md:hidden mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-sm text-blue-800 text-center">
@@ -211,33 +207,39 @@ export const TasksLists = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                    {/* Columna Pendientes */}
-                    <DroppableColumn
-                        id={TaskDtoState.pending}
-                        title="Pendientes"
-                        tasks={tasksByState.pending}
-                        onEdit={(task) => setEditingTask(task)}
-                        onDelete={handleDeleteTask}
-                    />
+                <div className={containerClass}>
+                    <div className="min-w-[100vw] md:min-w-0 snap-start">
+                        <DroppableColumn
+                            id={TaskDtoState.pending}
+                            title="Pendientes"
+                            tasks={tasksByState.pending}
+                            onEdit={(task) => setEditingTask(task)}
+                            onDelete={handleDeleteTask}
+                            onAdd={(state) => { setInitialState(state); setIsCreateModalOpen(true); }}
+                        />
+                    </div>
 
-                    {/* Columna En Progreso */}
-                    <DroppableColumn
-                        id={TaskDtoState.in_progress}
-                        title="En Progreso"
-                        tasks={tasksByState.in_progress}
-                        onEdit={(task) => setEditingTask(task)}
-                        onDelete={handleDeleteTask}
-                    />
+                    <div className="min-w-[100vw] md:min-w-0 snap-start">
+                        <DroppableColumn
+                            id={TaskDtoState.in_progress}
+                            title="En Progreso"
+                            tasks={tasksByState.in_progress}
+                            onEdit={(task) => setEditingTask(task)}
+                            onDelete={handleDeleteTask}
+                            onAdd={(state) => { setInitialState(state); setIsCreateModalOpen(true); }}
+                        />
+                    </div>
 
-                    {/* Columna Completadas */}
-                    <DroppableColumn
-                        id={TaskDtoState.completed}
-                        title="Completadas"
-                        tasks={tasksByState.completed}
-                        onEdit={(task) => setEditingTask(task)}
-                        onDelete={handleDeleteTask}
-                    />
+                    <div className="min-w-[100vw] md:min-w-0 snap-start">
+                        <DroppableColumn
+                            id={TaskDtoState.completed}
+                            title="Completadas"
+                            tasks={tasksByState.completed}
+                            onEdit={(task) => setEditingTask(task)}
+                            onDelete={handleDeleteTask}
+                            onAdd={(state) => { setInitialState(state); setIsCreateModalOpen(true); }}
+                        />
+                    </div>
                 </div>
 
                 <DragOverlay>
@@ -255,9 +257,10 @@ export const TasksLists = () => {
                 onClose={() => setIsCreateModalOpen(false)}
                 onSubmit={handleCreateTask}
                 isLoading={isCreatingTask}
+                initialState={initialState}
             />
-           
-            <UpdateTaskModal
+
+            <EditTaskModal
                 isOpen={!!editingTask}
                 task={editingTask}
                 onClose={() => setEditingTask(null)}
@@ -265,6 +268,5 @@ export const TasksLists = () => {
                 isLoading={isCreatingTask}
             />
         </>
-
     );
-}
+};

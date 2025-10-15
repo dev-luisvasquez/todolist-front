@@ -9,7 +9,7 @@ import { showToast, showPromiseToast } from "@/utils/Alerts/toastAlerts";
 import { generateInitials } from "@/utils/initials";
 
 // Componentes
-import { InputForm } from "@/components/atoms/InputForm";
+import { InputForm } from "@/components/atoms/inputs/InputForm";
 import { ButtonAction } from "@/components/atoms/buttons/ButtonAction";
 import { AvatarPicker } from "@/components/atoms/AvatarPicker";
 
@@ -240,9 +240,9 @@ export const EditProfileForm = () => {
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="pt-6 border-t border-gray-200">
-            <div className="flex justify-end space-x-4">
+          
+          <div className="flex justify-end">
+            <div className="flex  space-x-2 w-md">
               {!isEditing ? (
                 <ButtonAction text="Editar" onClick={() => setIsEditing(true)} typeAction="edit" />
               ) : (

@@ -10,23 +10,53 @@ type BaseProps = {
   required?: boolean;
 };
 
-type ControlledProps = {
+type ControlledInputProps = {
   value: string | number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   defaultValue?: never;
 };
 
-type UncontrolledProps = {
+type UncontrolledInputProps = {
   defaultValue?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value?: never;
 };
 
-type FormDataProps = BaseProps & (ControlledProps | UncontrolledProps);
+type FormInputProps = BaseProps & (ControlledInputProps | UncontrolledInputProps);
 
-const stylesButton = "w-full px-4 py-3 border bg-[#F3EFF7] border-gray-300 rounded-4xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:text-gray-600"
+type ControlledTextAreaProps = {
+  value: string | number;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  defaultValue?: never;
+};
 
-export const InputForm = (props: FormDataProps) => {
+type UncontrolledTextAreaProps = {
+  defaultValue?: string | number;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  value?: never;
+};
+
+type TextAreaProps = BaseProps & { rows?: number } & (ControlledTextAreaProps | UncontrolledTextAreaProps);
+
+type SelectOption = { value: string; label: string };
+
+type ControlledSelectProps = {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  defaultValue?: never;
+};
+
+type UncontrolledSelectProps = {
+  defaultValue?: string;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  value?: never;
+};
+
+type SelectProps = BaseProps & { options: SelectOption[] } & (ControlledSelectProps | UncontrolledSelectProps);
+
+const stylesButton = "w-full px-4 py-3 border  border-gray-300 rounded-4xl focus:ring-2 focus:ring-[var(--accent)]  transition-colors disabled:bg-gray-100 disabled:text-gray-600"
+
+export const InputForm = (props: FormInputProps) => {
   const { placeholder, type = 'text', label, name, disabled, autocomplete, required } = props;
 
   const inputProps =
@@ -56,7 +86,7 @@ export const InputForm = (props: FormDataProps) => {
   );
 };
 
-export const InputPasswordForm = (props: FormDataProps) => {
+export const InputPasswordForm = (props: FormInputProps) => {
   const { placeholder, label, name, disabled } = props;
   const [show, setShow] = useState(false);
 
@@ -122,3 +152,77 @@ export const InputPasswordForm = (props: FormDataProps) => {
     </div>
   );
 };
+
+export const TextAreaForm = (props: TextAreaProps) => {
+  const { placeholder, label, name, disabled, required, rows = 4 } = props;
+
+  const inputProps =
+    'value' in props
+      ? { value: props.value ?? '', onChange: props.onChange }
+      : { defaultValue: props.defaultValue, onChange: props.onChange };
+
+  return (
+    <div>
+      {label && (
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
+          {label}
+        </label>
+      )}
+      <textarea
+        id={name}
+        name={name}
+        rows={rows}
+        disabled={disabled}
+        required={required}
+        {...inputProps}
+        className={stylesButton + " resize-none rounded-lg"}
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
+
+export const InputSelectForm = (props: SelectProps) => {
+  const { placeholder, label, name, disabled, required, options } = props;
+
+  const inputProps =
+    'value' in props
+      ? { value: props.value ?? '', onChange: props.onChange }
+      : { defaultValue: props.defaultValue, onChange: props.onChange };
+
+  return (
+    <div>
+      {label && (
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
+          {label}
+        </label>
+      )}
+
+      {/* contenedor relativo para posicionar el icono */}
+      <div className="relative">
+        <select
+          id={name}
+          name={name}
+          disabled={disabled}
+          required={required}
+          {...inputProps}
+          className={stylesButton + " appearance-none rounded-lg pr-10"} // espacio a la derecha para el icono
+        >
+          <option value="">{placeholder || 'Selecciona una opción'}</option>
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+
+        {/* ícono de flecha a la derecha */}
+        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400" aria-hidden="true">
+          <svg className="w-6 h-6" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
+          </svg>
+        </span>
+      </div>
+    </div>
+  );
+}

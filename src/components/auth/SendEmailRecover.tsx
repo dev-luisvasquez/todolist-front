@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSendRecoverEmail } from '@/hooks/useAuth';
 
 // Componentes
-import { InputForm } from '../atoms/InputForm';
+import { InputForm } from '../atoms/inputs/InputForm';
 import { ButtonAction } from '../atoms/buttons/ButtonAction';
 
 // Toast

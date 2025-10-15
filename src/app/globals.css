@@ -2,6 +2,10 @@
 @import 'swiper/css';
 @import 'swiper/css/navigation';
 @import 'swiper/css/pagination';
+@import 'tailwindcss';
+
+@plugin "@midudev/tailwind-animations";
+@plugin "daisyui";
 
 :root {
   --background: #ffffff;
@@ -42,7 +46,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     --background: #ffffff;
     --foreground: #000000;

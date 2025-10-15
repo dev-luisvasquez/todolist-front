@@ -7,7 +7,7 @@ import { showPromiseToast, showToast } from "@/utils/Alerts/toastAlerts";
 import { generateInitials } from "@/utils/initials";
 
 // Componentes
-import { InputForm } from "@/components/atoms/InputForm";
+import { InputForm } from "@/components/atoms/inputs/InputForm";
 import { ButtonAction } from "@/components/atoms/buttons/ButtonAction";
 import { AvatarPicker } from "@/components/atoms/AvatarPicker";
 

@@ -15,8 +15,8 @@ export const ProfilePage = () => {
                         <button 
                             className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                                 activeTab === "informacion" 
-                                    ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500 shadow-sm" 
-                                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                    ? "bg-[var(--primary-300)] text-[var(--primary-600)] border-l-4 border-[var(--primary-600)] shadow-sm" 
+                                    : "text-[var(--primary-600)] hover:bg-gray-100 hover:text-gray-900"
                             }`}
                             onClick={() => setActiveTab("informacion")}
                         >
@@ -30,8 +30,8 @@ export const ProfilePage = () => {
                         <button 
                             className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                                 activeTab === "contraseña" 
-                                    ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500 shadow-sm" 
-                                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                    ? "bg-[var(--primary-300)] text-[var(--primary-600)] border-l-4 border-[var(--primary-600)] shadow-sm" 
+                                    : "text-[var(--primary-600)] hover:bg-gray-50 hover:text-gray-900"
                             }`}
                             onClick={() => setActiveTab("contraseña")}
                         >
